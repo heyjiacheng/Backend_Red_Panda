@@ -1,13 +1,20 @@
 # Backend_Red_Panda
 
-## 和前端串通
+## 环境安装
 
-###文档处理
+安装依赖包：
+```bash
+pip install -r requirements.txt
+```
 
 开启后台
 ```bash
 python -m api.server
 ```
+
+## 和前端串通
+
+### 文档处理
 
 传入pdf
 

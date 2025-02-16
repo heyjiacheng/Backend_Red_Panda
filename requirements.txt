@@ -1,0 +1,6 @@
+flask>=2.0.1
+pymupdf>=0.18.0
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.0  # 如果使用GPU版本改为faiss-gpu
+python-dotenv>=0.19.0
+numpy>=1.21.0 
