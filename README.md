@@ -9,7 +9,7 @@ pip install -r requirements.txt
 
 开启后台
 ```bash
-python -m api.server
+python3 app.py
 ```
 
 ## 和前端串通
@@ -19,11 +19,17 @@ python -m api.server
 传入pdf
 
 ```bash
-curl -X POST -F "file=@/Users/jiadengxu/Documents/Proposal.pdf" http://localhost:5001/ingest
+curl --request POST \
+  --url http://localhost:8080/embed \
+  --header 'Content-Type: multipart/form-data' \
+  --form file=@/Users/jiadengxu/Documents/Proposal.pdf
 ```
 
-检查文本向量
+提问
 
 ```bash
-curl http://localhost:5001/vector-stats
+curl --request POST \
+  --url http://localhost:8080/query \
+  --header 'Content-Type: application/json' \
+  --data '{ "query": "What technique used here for 3D scene reconstruction?" }'
 ```

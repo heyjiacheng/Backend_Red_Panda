@@ -1,10 +1,8 @@
-flask>=2.0.1
-pymupdf>=0.18.0
-sentence-transformers>=2.2.0
-faiss-cpu>=1.7.0  # 如果使用GPU版本改为faiss-gpu
-python-dotenv>=0.19.0
-numpy>=1.21.0
-werkzeug>=2.0.3  # Flask的依赖工具包
-transformers>=4.26.1  # sentence-transformers的依赖
-torch>=1.13.1  # transformers需要PyTorch后端
-requests>=2.28.1  # 用于可能的HTTP请求处理
+flask
+chromadb
+unstructured
+langchain
+langchain-text-splitters
+unstructured[all-docs]
+langchain-community
+langchain-core
