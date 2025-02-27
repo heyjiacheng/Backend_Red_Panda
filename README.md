@@ -12,24 +12,78 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
-## 和前端串通
+## API 接口文档
+
+### 知识库管理
+
+#### 创建知识库
+
+```bash
+curl --request POST \
+  --url http://localhost:8080/knowledge-bases \
+  --header 'Content-Type: application/json' \
+  --data '{"name": "研究论文", "description": "我的研究论文集合"}'
+```
+
+#### 列出所有知识库
+
+```bash
+curl --request GET \
+  --url http://localhost:8080/knowledge-bases
+```
+
+#### 获取单个知识库详情
+
+```bash
+curl --request GET \
+  --url http://localhost:8080/knowledge-bases/1
+```
+
+#### 更新知识库
+
+```bash
+curl --request PUT \
+  --url http://localhost:8080/knowledge-bases/1 \
+  --header 'Content-Type: application/json' \
+  --data '{"name": "更新的名称", "description": "更新的描述"}'
+```
+
+#### 删除知识库
+
+```bash
+curl --request DELETE \
+  --url http://localhost:8080/knowledge-bases/1
+```
 
 ### 文档处理
 
 #### 上传文档
 
 ```bash
+# 上传到默认知识库
 curl --request POST \
   --url http://localhost:8080/embed \
   --header 'Content-Type: multipart/form-data' \
-  --form file=@/Users/jiadengxu/Documents/Proposal.pdf
+  --form file=@/path/to/your/document.pdf
+
+# 上传到指定知识库
+curl --request POST \
+  --url http://localhost:8080/embed \
+  --header 'Content-Type: multipart/form-data' \
+  --form file=@/path/to/your/document.pdf \
+  --form knowledge_base_id=2
 ```
 
 #### 列出所有文档
 
 ```bash
+# 列出所有文档
 curl --request GET \
   --url http://localhost:8080/documents
+
+# 列出特定知识库中的文档
+curl --request GET \
+  --url http://localhost:8080/documents?knowledge_base_id=2
 ```
 
 #### 获取文档详情（单个文档）
@@ -53,11 +107,20 @@ curl --request DELETE \
   --url http://localhost:8080/documents/1
 ```
 
+### 查询功能
+
 #### 提问
 
 ```bash
+# 在所有知识库中查询
 curl --request POST \
   --url http://localhost:8080/query \
   --header 'Content-Type: application/json' \
   --data '{ "query": "What technique used here for 3D scene reconstruction?" }'
+
+# 在特定知识库中查询
+curl --request POST \
+  --url http://localhost:8080/query \
+  --header 'Content-Type: application/json' \
+  --data '{ "query": "What technique used here for 3D scene reconstruction?", "knowledge_base_id": 2 }'
 ```
