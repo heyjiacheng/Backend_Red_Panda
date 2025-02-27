@@ -16,7 +16,7 @@ python3 app.py
 
 ### 文档处理
 
-传入pdf
+#### 上传文档
 
 ```bash
 curl --request POST \
@@ -25,7 +25,35 @@ curl --request POST \
   --form file=@/Users/jiadengxu/Documents/Proposal.pdf
 ```
 
-提问
+#### 列出所有文档
+
+```bash
+curl --request GET \
+  --url http://localhost:8080/documents
+```
+
+#### 获取文档详情（单个文档）
+```bash
+curl --request GET \
+  --url http://localhost:8080/documents/1
+```
+
+#### 下载文档
+
+```bash
+curl --request GET \
+  --url http://localhost:8080/documents/1/download \
+  --output downloaded_document.pdf
+```
+
+#### 删除文档
+
+```bash
+curl --request DELETE \
+  --url http://localhost:8080/documents/1
+```
+
+#### 提问
 
 ```bash
 curl --request POST \
