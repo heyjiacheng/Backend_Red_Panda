@@ -60,17 +60,11 @@ curl --request DELETE \
 #### 上传文档
 
 ```bash
-# 上传到默认知识库
-curl --request POST \
-  --url http://localhost:8080/embed \
-  --header 'Content-Type: multipart/form-data' \
-  --form file=@/path/to/your/document.pdf
-
 # 上传到指定知识库
-curl --request POST \
-  --url http://localhost:8080/embed \
+curl --request POST \  
+  --url http://localhost:8080/embed \    
   --header 'Content-Type: multipart/form-data' \
-  --form file=@/path/to/your/document.pdf \
+  --form file=@/Users/jiadengxu/Documents/3d_gaussian_splatting_low.pdf\
   --form knowledge_base_id=2
 ```
 
@@ -81,9 +75,6 @@ curl --request POST \
 curl --request GET \
   --url http://localhost:8080/documents
 
-# 列出特定知识库中的文档
-curl --request GET \
-  --url http://localhost:8080/documents?knowledge_base_id=2
 ```
 
 #### 获取文档详情（单个文档）
@@ -119,8 +110,8 @@ curl --request POST \
   --data '{ "query": "What technique used here for 3D scene reconstruction?" }'
 
 # 在特定知识库中查询
-curl --request POST \
-  --url http://localhost:8080/query \
-  --header 'Content-Type: application/json' \
-  --data '{ "query": "What technique used here for 3D scene reconstruction?", "knowledge_base_id": 2 }'
+curl -X POST \         
+  http://localhost:8080/query \      
+  -H "Content-Type: application/json" \         
+  -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
 ```
