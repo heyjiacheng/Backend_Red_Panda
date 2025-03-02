@@ -42,7 +42,7 @@ def create_knowledge_base():
     data = request.get_json()
     
     if not data or 'name' not in data:
-        return jsonify({"error": "知识库名称是必填项"}), 400
+        return jsonify({"error": "name is required"}), 400
     
     name = data.get('name')
     description = data.get('description', '')
@@ -58,7 +58,7 @@ def create_knowledge_base():
     conn.close()
     
     return jsonify({
-        "message": "知识库创建成功",
+        "message": "success with knowledge",
         "knowledge_base_id": kb_id
     }), 201
 
@@ -74,7 +74,7 @@ def get_knowledge_base(kb_id):
     
     if not kb:
         conn.close()
-        return jsonify({"error": "找不到指定知识库"}), 404
+        return jsonify({"error": "knowledge base not found"}), 404
     
     # 获取该知识库下的所有文档
     cursor.execute(
@@ -95,7 +95,7 @@ def update_knowledge_base(kb_id):
     data = request.get_json()
     
     if not data:
-        return jsonify({"error": "没有提供更新数据"}), 400
+        return jsonify({"error": "no data provided"}), 400
     
     name = data.get('name')
     description = data.get('description')
@@ -112,7 +112,7 @@ def update_knowledge_base(kb_id):
         params.append(description)
     
     if not updates:
-        return jsonify({"error": "没有有效的更新字段"}), 400
+        return jsonify({"error": "no valid update fields"}), 400
     
     conn = get_db_connection(DB_PATH)
     cursor = conn.cursor()
@@ -121,7 +121,7 @@ def update_knowledge_base(kb_id):
     cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
     if not cursor.fetchone():
         conn.close()
-        return jsonify({"error": "找不到指定知识库"}), 404
+        return jsonify({"error": "knowledge base not found"}), 404
     
     # 更新知识库
     query = f"UPDATE knowledge_bases SET {', '.join(updates)} WHERE id = ?"
@@ -130,7 +130,7 @@ def update_knowledge_base(kb_id):
     conn.commit()
     conn.close()
     
-    return jsonify({"message": "知识库更新成功"})
+    return jsonify({"message": "knowledge base updated"})
 
 @app.route('/knowledge-bases/<int:kb_id>', methods=['DELETE'])
 def delete_knowledge_base(kb_id):
@@ -142,7 +142,7 @@ def delete_knowledge_base(kb_id):
     cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
     if not cursor.fetchone():
         conn.close()
-        return jsonify({"error": "找不到指定知识库"}), 404
+        return jsonify({"error": "knowledge base not found"}), 404
     
     # 获取该知识库下的所有文档
     cursor.execute("SELECT file_path FROM documents WHERE knowledge_base_id = ?", (kb_id,))
@@ -163,7 +163,7 @@ def delete_knowledge_base(kb_id):
     conn.commit()
     conn.close()
     
-    return jsonify({"message": "知识库及其所有文档已成功删除"})
+    return jsonify({"message": "knowledge base deleted"})
 
 # ================ 文档管理API ================
 
@@ -184,7 +184,7 @@ def list_documents():
             )
         except ValueError:
             conn.close()
-            return jsonify({"error": "无效的知识库ID"}), 400
+            return jsonify({"error": "invalid knowledge base id"}), 400
     else:
         cursor.execute("SELECT id, original_filename, upload_date, file_size, knowledge_base_id FROM documents ORDER BY upload_date DESC")
     
@@ -204,7 +204,7 @@ def get_document(doc_id):
     if document:
         return jsonify(dict(document))
     else:
-        return jsonify({"error": "找不到指定文档"}), 404
+        return jsonify({"error": "document not found"}), 404
 
 @app.route('/documents/<int:doc_id>/download', methods=['GET'])
 def download_document(doc_id):
@@ -216,12 +216,12 @@ def download_document(doc_id):
     conn.close()
     
     if not result:
-        return jsonify({"error": "找不到指定文档"}), 404
+        return jsonify({"error": "document not found"}), 404
     
     file_path, original_filename = result
     
     if not os.path.exists(file_path):
-        return jsonify({"error": "文件不存在"}), 404
+        return jsonify({"error": "file not found"}), 404
     
     return send_file(file_path, download_name=original_filename, as_attachment=True)
 
@@ -235,7 +235,7 @@ def delete_document(doc_id):
     
     if not result:
         conn.close()
-        return jsonify({"error": "找不到指定文档"}), 404
+        return jsonify({"error": "document not found"}), 404
     
     file_path = result[0]
     
@@ -248,7 +248,7 @@ def delete_document(doc_id):
     if os.path.exists(file_path):
         os.remove(file_path)
     
-    return jsonify({"message": "文档已成功删除"})
+    return jsonify({"message": "document deleted"})
 
 # ================ 嵌入和查询API ================
 
@@ -256,46 +256,55 @@ def delete_document(doc_id):
 def route_embed():
     """上传并嵌入文档"""
     if 'file' not in request.files:
-        return jsonify({"error": "请上传文件"}), 400
+        return jsonify({"error": "please upload a file"}), 400
 
     file = request.files['file']
 
     if file.filename == '':
-        return jsonify({"error": "未选择文件"}), 400
+        return jsonify({"error": "no file selected"}), 400
     
     # 获取知识库ID，默认为1
     kb_id = request.form.get('knowledge_base_id', 1)
     try:
         kb_id = int(kb_id)
     except ValueError:
-        return jsonify({"error": "无效的知识库ID"}), 400
+        return jsonify({"error": "invalid knowledge base id"}), 400
     
     success, doc_id = embed_document(file, kb_id)
 
     if success:
         return jsonify({
-            "message": "文档嵌入成功",
+            "message": "success with embedding",
             "document_id": doc_id
         }), 200
 
-    return jsonify({"error": "文档嵌入失败"}), 400
+    return jsonify({"error": "failed to embed document"}), 400
 
 @app.route('/query', methods=['POST'])
 def route_query():
-    """查询文档内容"""
-    data = request.get_json()
-    user_query = data.get('query')
-    kb_id = data.get('knowledge_base_id')
-    
-    if not user_query:
-        return jsonify({"error": "请提供查询内容"}), 400
-    
-    response = perform_query(user_query, kb_id)
+    """查询文档内容并返回带有源信息的回答"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "please provide a request body"}), 400
+            
+        user_query = data.get('query')
+        kb_id = data.get('knowledge_base_id')
+        
+        if not user_query:
+            return jsonify({"error": "please provide a query"}), 400
+        
+        response = perform_query(user_query, kb_id)
 
-    if response:
-        return jsonify({"message": response}), 200
-
-    return jsonify({"error": "查询处理失败"}), 400
+        if response:
+            # 确保响应可以正确序列化为JSON
+            return jsonify(response), 200
+        
+        return jsonify({"error": "failed to query"}), 400
+    except Exception as e:
+        print(f"error with query: {str(e)}")
+        return jsonify({"error": f"error with query:{str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080, debug=True)
