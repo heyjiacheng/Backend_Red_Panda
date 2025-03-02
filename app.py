@@ -1,13 +1,10 @@
 import os
-from dotenv import load_dotenv
 import sqlite3
 from flask import Flask, request, jsonify, send_file
 from embed import embed_document
 from query import perform_query
 from db_utils import init_database, get_db_connection
 
-# 加载环境变量
-load_dotenv()
 
 # 定义常量
 TEMP_FOLDER = os.getenv('TEMP_FOLDER', './_temp')
@@ -305,6 +302,39 @@ def route_query():
     except Exception as e:
         print(f"error with query: {str(e)}")
         return jsonify({"error": f"error with query:{str(e)}"}), 500
+
+# 添加一个新的路由，简化文档上传
+@app.route('/upload/<int:kb_id>', methods=['POST'])
+def upload_document_simple(kb_id):
+    """简化的文档上传接口，通过URL路径接收知识库ID"""
+    if 'file' not in request.files:
+        return jsonify({"error": "please upload a file"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "no file selected"}), 400
+    
+    # 验证知识库是否存在
+    conn = get_db_connection(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
+    kb = cursor.fetchone()
+    conn.close()
+    
+    if not kb:
+        return jsonify({"error": "knowledge base not found"}), 404
+    
+    success, doc_id = embed_document(file, kb_id)
+
+    if success:
+        return jsonify({
+            "message": "success with embedding",
+            "document_id": doc_id,
+            "knowledge_base_id": kb_id
+        }), 200
+
+    return jsonify({"error": "failed to embed document"}), 400
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080, debug=True)

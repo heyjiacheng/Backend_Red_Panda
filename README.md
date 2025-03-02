@@ -2,11 +2,23 @@
 
 ## 环境安装
 
+从[官网](https://ollama.com/)安装Ollama。
+再下载所需模型（可在.env中替换）：
+```bash
+# 下载语言模型
+ollama run deepseek-r1:1.5b
+# 下载文本嵌入模型
+ollama pull nomic-embed-text
+```
+克隆项目：
+```bash
+git clone https://github.com/heyjiacheng/Backend_Red_Panda.git
+cd Backend_Red_Panda
+```
 安装依赖包：
 ```bash
 pip install -r requirements.txt
 ```
-
 开启后台
 ```bash
 python3 app.py
@@ -60,12 +72,8 @@ curl --request DELETE \
 #### 上传文档
 
 ```bash
-# 上传到指定知识库
-curl --request POST \  
-  --url http://localhost:8080/embed \    
-  --header 'Content-Type: multipart/form-data' \
-  --form file=@/Users/jiadengxu/Documents/3d_gaussian_splatting_low.pdf\
-  --form knowledge_base_id=2
+# 上传到指定知识库（2 号知识库）
+curl -X POST http://localhost:8080/upload/2 -F file=@/Users/jiadengxu/Documents/3d_gaussian_splatting_low.pdf
 ```
 
 #### 列出所有文档
@@ -111,7 +119,7 @@ curl --request POST \
 
 # 在特定知识库中查询
 curl -X POST \         
-  http://localhost:8080/query \      
-  -H "Content-Type: application/json" \         
+  http://localhost:8080/query \          
+  -H "Content-Type: application/json" \
   -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
 ```

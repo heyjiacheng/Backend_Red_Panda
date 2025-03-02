@@ -7,4 +7,3 @@ unstructured[all-docs]
 langchain-community
 langchain-core
 python-dotenv
-sqlite3
