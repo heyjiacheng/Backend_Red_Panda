@@ -1,13 +1,10 @@
 import os
-from dotenv import load_dotenv
 import sqlite3
 from flask import Flask, request, jsonify, send_file
 from embed import embed_document
 from query import perform_query
 from db_utils import init_database, get_db_connection
 
-# 加载环境变量
-load_dotenv()
 
 # 定义常量
 TEMP_FOLDER = os.getenv('TEMP_FOLDER', './_temp')

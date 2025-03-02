@@ -111,7 +111,7 @@ curl --request POST \
 
 # 在特定知识库中查询
 curl -X POST \         
-  http://localhost:8080/query \      
-  -H "Content-Type: application/json" \         
+  http://localhost:8080/query \          
+  -H "Content-Type: application/json" \
   -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
 ```
