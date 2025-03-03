@@ -31,40 +31,31 @@ python3 app.py
 #### 创建知识库
 
 ```bash
-curl --request POST \
-  --url http://localhost:8080/knowledge-bases \
-  --header 'Content-Type: application/json' \
-  --data '{"name": "研究论文", "description": "我的研究论文集合"}'
+curl -X POST http://localhost:8080/knowledge-bases -H "Content-Type: application/json" -d '{"name": "research_paper", "description": "my_papers"}'
 ```
 
 #### 列出所有知识库
 
 ```bash
-curl --request GET \
-  --url http://localhost:8080/knowledge-bases
+curl -X GET http://localhost:8080/knowledge-bases
 ```
 
 #### 获取单个知识库详情
 
 ```bash
-curl --request GET \
-  --url http://localhost:8080/knowledge-bases/1
+curl -X GET http://localhost:8080/knowledge-bases/1
 ```
 
 #### 更新知识库
 
 ```bash
-curl --request PUT \
-  --url http://localhost:8080/knowledge-bases/1 \
-  --header 'Content-Type: application/json' \
-  --data '{"name": "更新的名称", "description": "更新的描述"}'
+curl -X PUT http://localhost:8080/knowledge-bases/1 -H "Content-Type: application/json" -d '{"name": "updated_name", "description": "updated_description"}'
 ```
 
 #### 删除知识库
 
 ```bash
-curl --request DELETE \
-  --url http://localhost:8080/knowledge-bases/1
+curl -X DELETE http://localhost:8080/knowledge-bases/1
 ```
 
 ### 文档处理
@@ -80,30 +71,24 @@ curl -X POST http://localhost:8080/upload/2 -F file=@/Users/jiadengxu/Documents/
 
 ```bash
 # 列出所有文档
-curl --request GET \
-  --url http://localhost:8080/documents
-
+curl -X GET http://localhost:8080/documents
 ```
 
 #### 获取文档详情（单个文档）
 ```bash
-curl --request GET \
-  --url http://localhost:8080/documents/1
+curl -X GET http://localhost:8080/documents/1
 ```
 
 #### 下载文档
 
 ```bash
-curl --request GET \
-  --url http://localhost:8080/documents/1/download \
-  --output downloaded_document.pdf
+curl -X GET http://localhost:8080/documents/1/download --output downloaded_document.pdf
 ```
 
 #### 删除文档
 
 ```bash
-curl --request DELETE \
-  --url http://localhost:8080/documents/1
+curl -X DELETE http://localhost:8080/documents/1
 ```
 
 ### 查询功能
@@ -112,14 +97,9 @@ curl --request DELETE \
 
 ```bash
 # 在所有知识库中查询
-curl --request POST \
-  --url http://localhost:8080/query \
-  --header 'Content-Type: application/json' \
-  --data '{ "query": "What technique used here for 3D scene reconstruction?" }'
+curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What technique used here for 3D scene reconstruction?"}'
 
 # 在特定知识库中查询
-curl -X POST \         
-  http://localhost:8080/query \          
-  -H "Content-Type: application/json" \
-  -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
+curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
+```
 ```
