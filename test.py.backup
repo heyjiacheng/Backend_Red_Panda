@@ -1,0 +1,378 @@
+#!/usr/bin/env python3
+import requests
+import json
+import os
+import time
+import sys
+import subprocess
+from pathlib import Path
+from colorama import Fore, Style, init
+from datetime import datetime
+
+# Initialize colorama for colored output
+init()
+
+BASE_URL = "http://localhost:8080"
+TEST_PDF_PATH = None  # Will be set dynamically later
+LOG_FILE = "api_test_log.txt"
+
+def print_success(message):
+    print(f"{Fore.GREEN}✓ {message}{Style.RESET_ALL}")
+
+def print_error(message):
+    print(f"{Fore.RED}✗ {message}{Style.RESET_ALL}")
+    
+def print_header(message):
+    print(f"\n{Fore.CYAN}=== {message} ==={Style.RESET_ALL}")
+
+def print_info(message):
+    print(f"{Fore.YELLOW}ℹ {message}{Style.RESET_ALL}")
+
+def log_curl_and_response(curl_cmd, response):
+    """Log the curl command and API response to a text file"""
+    with open(LOG_FILE, 'a') as f:
+        f.write(f"\n\n{'=' * 80}\n")
+        f.write(f"TIMESTAMP: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"CURL COMMAND:\n{curl_cmd}\n\n")
+        f.write(f"RESPONSE STATUS: {response.status_code}\n")
+        try:
+            # Try to format response as JSON
+            f.write(f"RESPONSE BODY:\n{json.dumps(response.json(), indent=2)}\n")
+        except:
+            # If not JSON, write as text
+            f.write(f"RESPONSE BODY:\n{response.text}\n")
+
+def generate_curl_command(method, endpoint, headers=None, data=None, files=None, output=None):
+    """Generate a curl command equivalent to the request being made"""
+    curl_cmd = f"curl -X {method} {BASE_URL}/{endpoint}"
+    
+    if headers:
+        for key, value in headers.items():
+            curl_cmd += f" -H \"{key}: {value}\""
+    
+    if data:
+        if isinstance(data, dict):
+            curl_cmd += f" -d '{json.dumps(data)}'"
+        else:
+            curl_cmd += f" -d '{data}'"
+    
+    if files and 'file' in files:
+        file_path = files['file'].name if hasattr(files['file'], 'name') else str(files['file'])
+        curl_cmd += f" -F file=@{file_path}"
+    
+    if output:
+        curl_cmd += f" --output {output}"
+    
+    return curl_cmd
+
+def make_request(method, endpoint, json_data=None, headers=None, files=None, output=None):
+    """Make a request and log the equivalent curl command and response"""
+    url = f"{BASE_URL}/{endpoint}"
+    
+    # Generate curl command for logging
+    curl_cmd = generate_curl_command(
+        method, 
+        endpoint, 
+        headers=headers, 
+        data=json_data, 
+        files=files,
+        output=output
+    )
+    
+    # Make the actual request
+    if method.upper() == 'GET':
+        response = requests.get(url, headers=headers)
+    elif method.upper() == 'POST':
+        response = requests.post(url, json=json_data, headers=headers, files=files)
+    elif method.upper() == 'PUT':
+        response = requests.put(url, json=json_data, headers=headers)
+    elif method.upper() == 'DELETE':
+        response = requests.delete(url, headers=headers)
+    else:
+        raise ValueError(f"Unsupported method: {method}")
+    
+    # Log the curl command and response
+    log_curl_and_response(curl_cmd, response)
+    
+    return response
+
+def find_sample_pdf():
+    """Find a PDF file to use for testing"""
+    # Try common locations
+    common_paths = [
+        Path.home() / "Documents",
+        Path.home() / "Downloads",
+        Path(".")
+    ]
+    
+    for path in common_paths:
+        if path.exists():
+            for file in path.glob("**/*.pdf"):
+                print_info(f"Found sample PDF for testing: {file}")
+                return str(file)
+    
+    print_error("No PDF file found for testing. Please provide a path to a PDF file.")
+    pdf_path = input("Enter path to a PDF file for testing: ")
+    if os.path.exists(pdf_path) and pdf_path.lower().endswith('.pdf'):
+        return pdf_path
+    else:
+        print_error("Invalid PDF file path.")
+        sys.exit(1)
+
+def test_knowledge_base_management():
+    print_header("Testing Knowledge Base Management")
+    
+    # Create a knowledge base
+    print_info("Creating knowledge base...")
+    create_payload = {
+        "name": "Test Knowledge Base",
+        "description": "Testing the API functionality"
+    }
+    headers = {'Content-Type': 'application/json'}
+    response = make_request('POST', 'knowledge-bases', json_data=create_payload, headers=headers)
+    
+    if response.status_code == 201:
+        # Get the knowledge base ID using the correct field name
+        kb_id = response.json().get("knowledge_base_id")
+        print_success(f"Created knowledge base with ID: {kb_id}")
+    else:
+        print_error(f"Failed to create knowledge base: {response.status_code} - {response.text}")
+        kb_id = None
+    
+    # List all knowledge bases
+    print_info("Listing all knowledge bases...")
+    response = make_request('GET', 'knowledge-bases')
+    if response.status_code == 200:
+        kb_list = response.json()
+        print_success(f"Listed {len(kb_list.get('knowledge_bases', []))} knowledge bases")
+    else:
+        print_error(f"Failed to list knowledge bases: {response.status_code} - {response.text}")
+    
+    if kb_id:
+        # Get single knowledge base
+        print_info(f"Getting details for knowledge base ID: {kb_id}")
+        response = make_request('GET', f"knowledge-bases/{kb_id}")
+        if response.status_code == 200:
+            kb_details = response.json()
+            print_success(f"Retrieved details for knowledge base: {kb_details.get('name')}")
+        else:
+            print_error(f"Failed to get knowledge base details: {response.status_code} - {response.text}")
+        
+        # Update knowledge base
+        print_info(f"Updating knowledge base ID: {kb_id}")
+        update_payload = {
+            "name": "Updated Test Knowledge Base",
+            "description": "Updated description for testing"
+        }
+        response = make_request('PUT', f"knowledge-bases/{kb_id}", json_data=update_payload, headers=headers)
+        if response.status_code == 200:
+            updated_kb = response.json()
+            print_success(f"Updated knowledge base: {updated_kb.get('name')}")
+        else:
+            print_error(f"Failed to update knowledge base: {response.status_code} - {response.text}")
+    
+    return kb_id
+
+def test_document_processing(kb_id):
+    print_header("Testing Document Processing")
+    
+    if not kb_id:
+        print_error("Cannot test document processing without a valid knowledge base ID")
+        return None
+    
+    # Upload document
+    print_info(f"Uploading document to knowledge base ID: {kb_id}")
+    with open(TEST_PDF_PATH, 'rb') as f:
+        files = {'file': f}
+        response = make_request('POST', f"upload/{kb_id}", files=files)
+    
+    if response.status_code in [200, 201]:
+        doc_data = response.json()
+        # Try different possible field names for document ID
+        doc_id = doc_data.get("id") or doc_data.get("document_id") or doc_data.get("doc_id")
+        if not doc_id and isinstance(doc_data, dict):
+            # If we can't find the ID through direct fields, try to find first integer value
+            for key, value in doc_data.items():
+                if isinstance(value, int):
+                    doc_id = value
+                    print_info(f"Using {key}: {value} as document ID")
+                    break
+        print_success(f"Uploaded document with ID: {doc_id}")
+    else:
+        print_error(f"Failed to upload document: {response.status_code} - {response.text}")
+        return None
+    
+    # Give some time for processing
+    print_info("Waiting for document processing...")
+    time.sleep(3)
+    
+    # List all documents
+    print_info("Listing all documents...")
+    response = make_request('GET', "documents")
+    if response.status_code == 200:
+        doc_list = response.json()
+        print_success(f"Listed {len(doc_list)} documents")
+    else:
+        print_error(f"Failed to list documents: {response.status_code} - {response.text}")
+    
+    # Get document details
+    print_info(f"Getting details for document ID: {doc_id}")
+    response = make_request('GET', f"documents/{doc_id}")
+    if response.status_code == 200:
+        doc_details = response.json()
+        print_success(f"Retrieved details for document: {doc_details.get('original_filename', doc_id)}")
+    else:
+        print_error(f"Failed to get document details: {response.status_code} - {response.text}")
+    
+    # Download document
+    print_info(f"Downloading document ID: {doc_id}")
+    temp_output_path = "downloaded_test_document.pdf"
+    response = make_request('GET', f"documents/{doc_id}/download", output=temp_output_path)
+    
+    if response.status_code == 200:
+        with open(temp_output_path, 'wb') as f:
+            f.write(response.content)
+        print_success(f"Downloaded document to: {temp_output_path}")
+        
+        # Clean up downloaded file
+        try:
+            os.remove(temp_output_path)
+            print_info(f"Cleaned up downloaded file: {temp_output_path}")
+        except:
+            print_info(f"Note: Could not remove downloaded file: {temp_output_path}")
+    else:
+        print_error(f"Failed to download document: {response.status_code} - {response.text}")
+    
+    return doc_id
+
+def test_query_functionality(kb_id):
+    print_header("Testing Query Functionality")
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    # Test query across all knowledge bases
+    print_info("Testing query across all knowledge bases")
+    query_payload = {
+        "query": "What are the key points in this document?"
+    }
+    response = make_request('POST', "query", json_data=query_payload, headers=headers)
+    if response.status_code in range(200, 300):  # Accept any 2XX status code
+        print_success("Successfully queried all knowledge bases")
+        try:
+            query_result = response.json()
+            print_info(f"Query response type: {type(query_result).__name__}")
+        except:
+            print_info("Response is not JSON format")
+    else:
+        print_error(f"Failed to query all knowledge bases: {response.status_code} - {response.text}")
+    
+    # Test query for specific knowledge base
+    if kb_id:
+        print_info(f"Testing query for knowledge base ID: {kb_id}")
+        query_payload = {
+            "query": "Summarize this document briefly",
+            "knowledge_base_id": kb_id
+        }
+        response = make_request('POST', "query", json_data=query_payload, headers=headers)
+        if response.status_code in range(200, 300):  # Accept any 2XX status code
+            print_success(f"Successfully queried knowledge base ID: {kb_id}")
+            try:
+                query_result = response.json()
+            except:
+                print_info("Response is not JSON format")
+        else:
+            print_error(f"Failed to query knowledge base: {response.status_code} - {response.text}")
+
+def cleanup(kb_id, doc_id):
+    print_header("Cleaning Up Test Resources")
+    
+    # Delete document if exists
+    if doc_id:
+        print_info(f"Deleting document ID: {doc_id}")
+        response = make_request('DELETE', f"documents/{doc_id}")
+        if response.status_code in range(200, 300):
+            print_success(f"Deleted document ID: {doc_id}")
+        else:
+            print_error(f"Failed to delete document: {response.status_code} - {response.text}")
+    
+    # Delete knowledge base if exists
+    if kb_id:
+        print_info(f"Deleting knowledge base ID: {kb_id}")
+        response = make_request('DELETE', f"knowledge-bases/{kb_id}")
+        if response.status_code in range(200, 300):
+            print_success(f"Deleted knowledge base ID: {kb_id}")
+        else:
+            print_error(f"Failed to delete knowledge base: {response.status_code} - {response.text}")
+
+def check_server_status():
+    print_header("Checking Server Status")
+    try:
+        response = make_request('GET', "knowledge-bases")
+        if response.status_code == 200:
+            print_success("Server is running and responding")
+            return True
+        else:
+            print_error(f"Server returned unexpected status code: {response.status_code}")
+            return False
+    except requests.exceptions.RequestException as e:
+        print_error(f"Could not connect to server: {e}")
+        print_info("Please make sure the server is running at http://localhost:8080")
+        return False
+
+def cleanup_log_file():
+    """Delete log file if it exists"""
+    try:
+        if os.path.exists(LOG_FILE):
+            os.remove(LOG_FILE)
+            print_info(f"Removed existing log file: {LOG_FILE}")
+    except Exception as e:
+        print_error(f"Failed to remove log file: {e}")
+
+def main():
+    global TEST_PDF_PATH
+    
+    print_header("Red Panda Backend API Test")
+    print_info("This script will test all API endpoints from the README.md")
+    print_info(f"All curl commands and responses will be logged to {LOG_FILE}")
+    
+    # Initialize log file
+    cleanup_log_file()
+    with open(LOG_FILE, 'w') as f:
+        f.write(f"RED PANDA BACKEND API TEST LOG\n")
+        f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"{'=' * 80}\n")
+    
+    if not check_server_status():
+        return
+    
+    TEST_PDF_PATH = find_sample_pdf()
+    if not TEST_PDF_PATH:
+        print_error("No PDF file available for testing.")
+        return
+    
+    try:
+        # Run tests in sequence
+        kb_id = test_knowledge_base_management()
+        doc_id = test_document_processing(kb_id)
+        test_query_functionality(kb_id)
+        
+        # Clean up
+        cleanup(kb_id, doc_id)
+        
+        print_header("Test Summary")
+        print_success("All tests completed!")
+        print_info(f"Check {LOG_FILE} for detailed curl commands and responses")
+        print_info("Note: Some tests might have failed, check the output above for details.")
+        
+    except Exception as e:
+        print_error(f"An error occurred during testing: {e}")
+        print_info("Attempting cleanup...")
+        try:
+            cleanup(kb_id, doc_id)
+        except:
+            print_error("Cleanup after error failed")
+    
+    print_info(f"Test log file created at: {os.path.abspath(LOG_FILE)}")
+
+if __name__ == "__main__":
+    main() 
