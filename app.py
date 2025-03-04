@@ -3,7 +3,8 @@ import sqlite3
 from flask import Flask, request, jsonify, send_file
 from embed import embed_document
 from query import perform_query
-from db_utils import init_database, get_db_connection
+from db_utils import init_database, get_db_connection, create_conversation, get_conversation, get_conversations, delete_conversation, save_conversation_message
+import json
 
 
 # 定义常量
@@ -288,20 +289,79 @@ def route_query():
             
         user_query = data.get('query')
         kb_id = data.get('knowledge_base_id')
+        conversation_id = data.get('conversation_id')
         
         if not user_query:
             return jsonify({"error": "please provide a query"}), 400
         
-        response = perform_query(user_query, kb_id)
-
-        if response:
-            # 确保响应可以正确序列化为JSON
-            return jsonify(response), 200
+        # 验证知识库ID (如果提供)
+        if kb_id is not None:
+            try:
+                kb_id = int(kb_id)
+                conn = get_db_connection(DB_PATH)
+                cursor = conn.cursor()
+                cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
+                kb_exists = cursor.fetchone() is not None
+                
+                # 检查知识库是否包含文档
+                cursor.execute("SELECT COUNT(*) FROM documents WHERE knowledge_base_id = ?", (kb_id,))
+                doc_count = cursor.fetchone()[0]
+                conn.close()
+                
+                if not kb_exists:
+                    return jsonify({"error": "knowledge base not found", "detail": f"Knowledge base ID {kb_id} does not exist"}), 404
+                
+                if doc_count == 0:
+                    return jsonify({
+                        "error": "knowledge base is empty", 
+                        "detail": f"Knowledge base ID {kb_id} has no documents. Please upload documents first."
+                    }), 400
+            except ValueError:
+                return jsonify({"error": "invalid knowledge base id"}), 400
         
-        return jsonify({"error": "failed to query"}), 400
+        # 验证对话ID (如果提供)
+        if conversation_id is not None:
+            try:
+                conversation_id = int(conversation_id)
+                conversation = get_conversation(DB_PATH, conversation_id)
+                if not conversation:
+                    return jsonify({"error": "conversation not found", "detail": f"Conversation ID {conversation_id} does not exist"}), 404
+            except ValueError:
+                return jsonify({"error": "invalid conversation id"}), 400
+        
+        # 执行查询获取回答
+        response = perform_query(user_query, kb_id)
+        
+        # 检查是否查询失败
+        if response and "error" in response:
+            # 如果perform_query返回了错误信息，返回给客户端
+            return jsonify(response), 400
+            
+        # 处理对话历史
+        if conversation_id:
+            try:
+                # 保存用户问题到对话历史
+                save_conversation_message(DB_PATH, conversation_id, 'user', user_query)
+                
+                # 保存AI回答到对话历史
+                sources_json = json.dumps(response.get('sources', [])) if response.get('sources') else None
+                save_conversation_message(DB_PATH, conversation_id, 'assistant', response.get('answer', ''), sources_json)
+                
+                # 添加会话ID到响应
+                response['conversation_id'] = conversation_id
+                
+            except Exception as e:
+                print(f"保存对话历史出错: {str(e)}")
+                # 添加警告但继续返回查询结果
+                response['warning'] = "Failed to save conversation history"
+        
+        # 确保响应可以正确序列化为JSON
+        return jsonify(response), 200
     except Exception as e:
-        print(f"error with query: {str(e)}")
-        return jsonify({"error": f"error with query:{str(e)}"}), 500
+        print(f"查询处理错误: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"error with query", "detail": str(e)}), 500
 
 # 添加一个新的路由，简化文档上传
 @app.route('/upload/<int:kb_id>', methods=['POST'])
@@ -323,8 +383,12 @@ def upload_document_simple(kb_id):
     conn.close()
     
     if not kb:
-        return jsonify({"error": "knowledge base not found"}), 404
+        return jsonify({
+            "error": "knowledge base not found",
+            "detail": f"Knowledge base ID {kb_id} does not exist"
+        }), 404
     
+    print(f"正在处理文件上传: {file.filename} 到知识库 {kb_id}")
     success, doc_id = embed_document(file, kb_id)
 
     if success:
@@ -334,7 +398,125 @@ def upload_document_simple(kb_id):
             "knowledge_base_id": kb_id
         }), 200
 
-    return jsonify({"error": "failed to embed document"}), 400
+    # 如果失败，尝试给出更具体的错误信息
+    if not file.filename or '.' not in file.filename:
+        return jsonify({"error": "invalid filename", "detail": "Filename is missing or invalid"}), 400
+    
+    file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if file_extension != 'pdf':
+        return jsonify({
+            "error": "unsupported file type", 
+            "detail": f"Only PDF files are supported. Received file type: {file_extension}"
+        }), 400
+        
+    return jsonify({
+        "error": "failed to embed document",
+        "detail": "An error occurred while processing the document. Please check server logs for details."
+    }), 500
+
+# ================ 对话历史API ================
+
+@app.route('/conversations', methods=['GET'])
+def list_conversations():
+    """获取对话历史列表，可按知识库筛选"""
+    kb_id = request.args.get('knowledge_base_id')
+    limit = request.args.get('limit', 20, type=int)
+    offset = request.args.get('offset', 0, type=int)
+    
+    try:
+        if kb_id:
+            kb_id = int(kb_id)
+    except ValueError:
+        return jsonify({"error": "invalid knowledge base id"}), 400
+    
+    conversations = get_conversations(DB_PATH, kb_id, limit, offset)
+    return jsonify({"conversations": conversations})
+
+@app.route('/conversations', methods=['POST'])
+def create_new_conversation():
+    """创建新的对话"""
+    data = request.get_json()
+    
+    if not data or 'title' not in data:
+        return jsonify({"error": "title is required"}), 400
+    
+    title = data.get('title')
+    kb_id = data.get('knowledge_base_id')
+    
+    try:
+        # 如果提供了知识库ID，验证其存在性
+        if kb_id:
+            kb_id = int(kb_id)
+            conn = get_db_connection(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
+            kb = cursor.fetchone()
+            conn.close()
+            
+            if not kb:
+                return jsonify({"error": "knowledge base not found"}), 404
+    except ValueError:
+        return jsonify({"error": "invalid knowledge base id"}), 400
+    
+    conversation_id = create_conversation(DB_PATH, title, kb_id)
+    
+    return jsonify({
+        "message": "conversation created",
+        "conversation_id": conversation_id
+    }), 201
+
+@app.route('/conversations/<int:conversation_id>', methods=['GET'])
+def get_conversation_detail(conversation_id):
+    """获取单个对话的详细信息及其消息历史"""
+    conversation = get_conversation(DB_PATH, conversation_id)
+    
+    if not conversation:
+        return jsonify({"error": "conversation not found"}), 404
+    
+    return jsonify(conversation)
+
+@app.route('/conversations/<int:conversation_id>', methods=['DELETE'])
+def delete_conversation_by_id(conversation_id):
+    """删除对话历史"""
+    success = delete_conversation(DB_PATH, conversation_id)
+    
+    if not success:
+        return jsonify({"error": "conversation not found or could not be deleted"}), 404
+    
+    return jsonify({"message": "conversation deleted"})
+
+@app.route('/conversations/<int:conversation_id>/messages', methods=['POST'])
+def add_conversation_message(conversation_id):
+    """向对话中添加新消息"""
+    data = request.get_json()
+    
+    if not data or 'content' not in data or 'message_type' not in data:
+        return jsonify({"error": "content and message_type are required"}), 400
+    
+    content = data.get('content')
+    message_type = data.get('message_type')
+    sources = data.get('sources')
+    
+    # 验证消息类型
+    if message_type not in ['user', 'assistant']:
+        return jsonify({"error": "message_type must be 'user' or 'assistant'"}), 400
+    
+    # 验证会话是否存在
+    conversation = get_conversation(DB_PATH, conversation_id)
+    if not conversation:
+        return jsonify({"error": "conversation not found"}), 404
+    
+    # 如果提供了sources且不是字符串，转换为JSON字符串
+    if sources and not isinstance(sources, str):
+        sources = json.dumps(sources)
+    
+    # 保存消息
+    message_id = save_conversation_message(DB_PATH, conversation_id, message_type, content, sources)
+    
+    return jsonify({
+        "message": "message added",
+        "message_id": message_id
+    }), 201
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8080, debug=True)

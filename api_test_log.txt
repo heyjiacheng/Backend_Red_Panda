@@ -1,10 +1,10 @@
 RED PANDA BACKEND API TEST LOG
-Generated on: 2025-03-04 00:19:18
+Generated on: 2025-03-04 22:11:47
 ================================================================================
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:19:18
+TIMESTAMP: 2025-03-04 22:11:47
 CURL COMMAND:
 curl -X GET http://localhost:8080/knowledge-bases
 
@@ -13,6 +13,12 @@ RESPONSE BODY:
 {
   "knowledge_bases": [
     {
+      "created_at": "2025-03-04 21:10:09",
+      "description": "my_papers",
+      "id": 13,
+      "name": "research_paper"
+    },
+    {
       "created_at": "2025-02-27 21:31:06",
       "description": "papers",
       "id": 2,
@@ -20,29 +26,29 @@ RESPONSE BODY:
     },
     {
       "created_at": "2025-02-27 21:30:10",
-      "description": "Default knowledge base for all documents",
+      "description": "updated_description",
       "id": 1,
-      "name": "Default Knowledge Base"
+      "name": "updated_name"
     }
   ]
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:19:18
+TIMESTAMP: 2025-03-04 22:11:47
 CURL COMMAND:
 curl -X POST http://localhost:8080/knowledge-bases -H "Content-Type: application/json" -d '{"name": "Test Knowledge Base", "description": "Testing the API functionality"}'
 
 RESPONSE STATUS: 201
 RESPONSE BODY:
 {
-  "knowledge_base_id": 10,
+  "knowledge_base_id": 14,
   "message": "success with knowledge"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:19:18
+TIMESTAMP: 2025-03-04 22:11:47
 CURL COMMAND:
 curl -X GET http://localhost:8080/knowledge-bases
 
@@ -51,10 +57,16 @@ RESPONSE BODY:
 {
   "knowledge_bases": [
     {
-      "created_at": "2025-03-03 23:19:18",
+      "created_at": "2025-03-04 21:11:47",
       "description": "Testing the API functionality",
-      "id": 10,
+      "id": 14,
       "name": "Test Knowledge Base"
+    },
+    {
+      "created_at": "2025-03-04 21:10:09",
+      "description": "my_papers",
+      "id": 13,
+      "name": "research_paper"
     },
     {
       "created_at": "2025-02-27 21:31:06",
@@ -64,241 +76,37 @@ RESPONSE BODY:
     },
     {
       "created_at": "2025-02-27 21:30:10",
-      "description": "Default knowledge base for all documents",
+      "description": "updated_description",
       "id": 1,
-      "name": "Default Knowledge Base"
+      "name": "updated_name"
     }
   ]
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:19:18
+TIMESTAMP: 2025-03-04 22:11:47
 CURL COMMAND:
-curl -X GET http://localhost:8080/knowledge-bases/10
+curl -X GET http://localhost:8080/knowledge-bases/14
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "created_at": "2025-03-03 23:19:18",
+  "created_at": "2025-03-04 21:11:47",
   "description": "Testing the API functionality",
   "documents": [],
-  "id": 10,
+  "id": 14,
   "name": "Test Knowledge Base"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:19:18
+TIMESTAMP: 2025-03-04 22:11:47
 CURL COMMAND:
-curl -X PUT http://localhost:8080/knowledge-bases/10 -H "Content-Type: application/json" -d '{"name": "Updated Test Knowledge Base", "description": "Updated description for testing"}'
+curl -X PUT http://localhost:8080/knowledge-bases/14 -H "Content-Type: application/json" -d '{"name": "Updated Test Knowledge Base", "description": "Updated description for testing"}'
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
   "message": "knowledge base updated"
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:19:28
-CURL COMMAND:
-curl -X POST http://localhost:8080/upload/10 -F file=@/Users/jiadengxu/Documents/rekep.pdf
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "document_id": 14,
-  "knowledge_base_id": 10,
-  "message": "success with embedding"
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:19:31
-CURL COMMAND:
-curl -X GET http://localhost:8080/documents
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "documents": [
-    {
-      "file_size": 13823419,
-      "id": 14,
-      "knowledge_base_id": 10,
-      "original_filename": "rekep.pdf",
-      "upload_date": "2025-03-03 23:19:28"
-    },
-    {
-      "file_size": 24343676,
-      "id": 12,
-      "knowledge_base_id": 2,
-      "original_filename": "3d_gaussian_splatting_low.pdf",
-      "upload_date": "2025-03-03 23:03:29"
-    },
-    {
-      "file_size": 13823419,
-      "id": 5,
-      "knowledge_base_id": 2,
-      "original_filename": "rekep.pdf",
-      "upload_date": "2025-03-01 21:15:12"
-    },
-    {
-      "file_size": 5869081,
-      "id": 4,
-      "knowledge_base_id": 2,
-      "original_filename": "GaussianGrasper.pdf",
-      "upload_date": "2025-02-27 21:46:40"
-    },
-    {
-      "file_size": 36379,
-      "id": 3,
-      "knowledge_base_id": 1,
-      "original_filename": "coverletter_SICK.pdf",
-      "upload_date": "2025-02-27 20:01:48"
-    },
-    {
-      "file_size": 75694,
-      "id": 2,
-      "knowledge_base_id": 1,
-      "original_filename": "Proposal.pdf",
-      "upload_date": "2025-02-27 19:57:05"
-    }
-  ]
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:19:31
-CURL COMMAND:
-curl -X GET http://localhost:8080/documents/14
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "file_path": "./documents/1741043958.874426_rekep.pdf",
-  "file_size": 13823419,
-  "id": 14,
-  "knowledge_base_id": 10,
-  "metadata": null,
-  "original_filename": "rekep.pdf",
-  "stored_filename": "1741043958.874426_rekep.pdf",
-  "upload_date": "2025-03-03 23:19:28"
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:20:00
-CURL COMMAND:
-curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What are the key points in this document?"}'
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "answer": "\u4ee5\u4e0b\u662f\u4e00\u4e9b\u5173\u952e\u70b9\uff1a\n\n1. **\u5f15\u8a00\uff08Introduction\uff09**  \n   - \u63d0\u5230 SICK Sensor Intelligence \u7684\u76ee\u6807\uff0c\u5373\u901a\u8fc7\u4eba\u5de5\u667a\u80fd\u4e0e\u786c\u4ef6\u7684\u7ed3\u5408\u6765 bridging \u6570\u5b66\u6a21\u578b\u4e0e\u5b9e\u9645\u5de5\u7a0b\u5e94\u7528\uff0c\u5c24\u5176\u662f robotics\u9886\u57df\u3002  \n   - \u5f3a\u8c03\u8be5\u5b9e\u4e60\u5bf9\u5b9e\u73b0\u590d\u6742\u4ea7\u54c1\u5982 SICK \u5185\u90e8\u7684\u5e94\u7528\u81f3\u5173\u91cd\u8981\u3002\n\n2. **\u95ee\u9898\u5206\u6790\uff08Problem Analysis\uff09**  \n   - \u63cf\u8ff0\u4e86 SICK Sensor Intelligence \u7684\u4e3b\u8981\u6311\u6218\uff1a\u5982\u4f55\u5c06 2D \u4fe1\u606f\u5e94\u7528\u4e8e\u5de5\u4e1a\u73af\u5883\u4e2d\uff0c\u7279\u522b\u662f\u5728\u5de5\u5382\u73af\u5883\u4e0b\u53ef\u80fd\u51fa\u73b0\u7684\u98ce\u9669\u3002  \n   - \u5f3a\u8c03\u4e86 Dino-x \u548c Gaussian Splatting \u7684\u5173\u952e\u4f5c\u7528\uff0c\u8fd9\u4e9b\u6280\u672f\u5728\u5de5\u4e1a\u73af\u5883\u4e2d\u7684\u8bc6\u522b\u548c\u7406\u89e3\u4e2d\u81f3\u5173\u91cd\u8981\u3002\n\n3. **\u5173\u952e\u70b9\uff08Key Points\uff09**  \n   - \u63cf\u8ff0\u4e86\u5b9e\u4e60\u7684\u6838\u5fc3\u5185\u5bb9\uff1a  \n     - \u4e3b\u9898\u4e4b\u4e00\u662f \u7269\u7406vision \u6280\u672f\uff0c\u5305\u62ec Object Understanding \u548c 3D Reconstruction\u3002  \n     - \u5177\u4f53\u4f8b\u5b50\u5305\u62ec Dino-x \u5bf9\u5f00\u653e\u4e16\u754c\u7269\u4f53\u8fdb\u884c\u7406\u89e3\u548c Gaussian Splatting \u7684 3D \u6062\u590d\u6280\u672f\u3002  \n     - \u8fd8\u63d0\u5230\u4e86\u5b9e\u4e60\u4e2d\u7684\u4e2a\u4eba\u5174\u8da3\uff1a\u524d\u6cbf\u7684 artificial intelligence\u3001\u56e2\u961f\u9879\u76ee\uff08\u4ece\u672a\u51b3\u5b9a\u7684\u6c7d\u8f66\u56e2\u961f\u5230\u9ad8\u5206\u961f\u4f0d\uff09\u4ee5\u53ca\u5bf9\u5927\u8bed\u8a00\u6a21\u578b Local Knowledge Base \u5de5\u4f5c\u4e2d\u7684 tokenization \u548c vector \u8868\u793a\u6cd5\u7684\u8d21\u732e\u3002\n\n4. **\u6311\u6218\uff08Challenges\uff09**  \n   - \u4ecb\u7ecd\u4e86\u5b9e\u4e60\u4e2d\u7684\u4e3b\u8981\u6311\u6218\uff1a\u65f6\u95f4\u538b\u529b\u3001\u56e2\u961f\u534f\u4f5c\u7b49\u3002  \n   - \u5f3a\u8c03\u4e86\u8fd9\u4e9b\u6311\u6218\u5728 SICK \u5185\u90e8\u7684\u5de5\u4f5c\u73af\u5883\u4e2d\u7684\u5177\u4f53\u4f53\u73b0\uff0c\u4ee5\u53ca\u5982\u4f55\u901a\u8fc7\u5b9e\u8df5\u89e3\u51b3\u95ee\u9898\u3002\n\n5. **\u7ed3\u8bba\uff08Conclusion\uff09**  \n   - \u603b\u7ed3\u4e86\u5b9e\u4e60\u7684\u673a\u4f1a\uff1a\u6df1\u5165\u7406\u89e3\u673a\u5668\u89c6\u89c9\u6280\u672f\uff0c\u5e76\u4e3a SICK \u7684\u5185\u90e8\u5e94\u7528\u63d0\u4f9b\u89c1\u89e3\u3002  \n   - \u63cf\u8ff0\u4e86\u4e2a\u4eba\u5bf9\u8ba1\u7b97\u673a\u89c6\u89c9\u548c 3D \u6062\u590d\u7684\u70ed\u7231\uff0c\u4ee5\u53ca\u5bf9\u672a\u6765\u804c\u4e1a\u53d1\u5c55\u7684\u70ed\u60c5\u3002",
-  "query": {
-    "kb_id": null,
-    "original": "What are the key points in this document?"
-  },
-  "sources": [
-    {
-      "content": "Dear Hiring Manager,\n\nI am writing to express my interest in the Summer internship at SICK Sensor Intelligence (Analyze Edge Learning AI Vision Performance with Incomplete Data). My career goal is to integrate algorithms with hardware, bridging the gap between mathematical models and real-world engineering applications, particularly in robotics.\n\nI am currently pursuing a Master\u2019s in Applied Mathematics at KTH, where my focus has always been on applying mathematical algorithms to engineering challenges. For qualification, I had courses GPU programming, Computer Vision and Applied Machine Learning during Master's study at KTH. However, I understand that coursework alone is not enough for developing complex products like those at SICK, which is why I actively seek hands-on experience in engineering applications.\n\nThe Master Thesis I'm working on now is about Object Understanding (Dino-x) and 3D Reconstruction (Gaussian Splatting) to inform UR5 robotic arm to manipulate. Additionally, I did a interesting embedding project (self-driving car) during my Bachelor, which was a exciting team work (from unknown racing car team to high rank nationally). Beyond academia, I'm also self-motivated with frontier of artificial intelligence, my colleagues and I are currently developing an application that creates a local knowledge base for Large Language Models by tokenizing documents into vector representations.\n\nThis internship aligns perfectly with my interests, as it offers an opportunity to deepen my understanding of machine vision techniques used in industry. I believe that 3D reconstruction will play a crucial role in industry environment recognition, as 2D information alone may overlook potential risks in factory settings.\n\nReally looking forward to an interview to discuss more on computer vision & 3D Reconstruction and what I can contribute to your team.\n\nSincerely, Jiacheng Xu",
-      "content_preview": "Dear Hiring Manager,\n\nI am writing to express my interest in the Summer internship at SICK Sensor In...",
-      "document_name": "coverletter_SICK.pdf",
-      "metadata": {},
-      "relevance_score": 74.30646126838448
-    },
-    {
-      "content": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng Xu & Dr. Sichao Liu\n\nBackground\n\nRobotic manipulation in unstructured environments remains a significant challenge in robotics research. This project aims to integrate techniques Dino-X [2] for open-vocabulary object detection, Gaussian Splatting [3] for 3D scene reconstruction, and ReKep [1] for task decomposition and spatial-temporal reasoning\u2014to enable robots to perform complex manipulation tasks. Specifically, the system will address tasks such as identifying and grasping objects like a cup, even in cluttered or dynamic environments. ReKep provides a novel approach to representing manipulation constraints using Relational Keypoint Con- straints (RKC), which are optimized through a hierarchical procedure to compute robot actions.\n\nApplication\n\nThe proposed framework targets applications in robotic manipulation for tasks such as pick-and-place, grasping, and task generalization in real-world environments like homes and warehouses. Using visual and language inputs (e.g., \u201dpick up a cup\u201d), the system will identify objects in 2D scenes, reconstruct their 3D representations, and compute optimal actions to achieve the task, even in scenarios involving task failure or long-horizon planning.\n\nProblems\n\nThe project involves solving several key mathematical and computational challenges:\n\nOpen-Vocabulary Object Detection and Segmentation: Efficiently identify- ing objects and generating precise masks using DinoX.\n\n3D Scene Reconstruction: Constructing rough but accurate object representa- tions using Gaussian Splatting for spatial understanding.\n\nTask Decomposition and Optimization: Formulating and solving tasks as se- quences of Relational Keypoint Constraints (RKC) using numerical optimization techniques.\n\nGeneralization and Error Handling: Developing algorithms for task failure detection and generalization across diverse tasks and environments.\n\n1\n\nTime Schedule\n\nMonth 1-2: Literature review and setup of development environment.\n\nMonth 3-4: Integration of DinoX for object detection and Gaussian Splatting for 3D reconstruction.\n\nMonth 5: Development of ReKep-based task decomposition and optimization framework.\n\nMonth 6: Final analysis, report writing, and thesis submission.\n\nReferences\n\n[1] Wenlong Huang, Chen Wang, Yunzhu Li, Ruohan Zhang, and Li Fei-Fei. Rekep: Spatio-temporal reasoning of relational keypoint constraints for robotic manipulation. arXiv preprint arXiv:2409.01652, 2024.\n\n[2] Bernhard Kerbl, Georgios Kopanas, Thomas Leimk\u00a8uhler, and George Drettakis. 3d gaussian splatting for real-time radiance field rendering. ACM Trans. Graph., 42(4):139\u20131, 2023.\n\n[3] Tianhe Ren, Yihao Chen, Qing Jiang, Zhaoyang Zeng, Yuda Xiong, Wenlong Liu, Zhengyu Ma, Junyi Shen, Yuan Gao, Xiaoke Jiang, et al. Dino-x: A unified vision model for open-world object detection and understanding. arXiv preprint arXiv:2411.14347, 2024.\n\n2",
-      "content_preview": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng X...",
-      "document_name": "Proposal.pdf",
-      "metadata": {},
-      "relevance_score": 69.8640179938826
-    },
-    {
-      "content": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng Xu & Dr. Sichao Liu\n\nBackground\n\nRobotic manipulation in unstructured environments remains a significant challenge in robotics research. This project aims to integrate techniques Dino-X [2] for open-vocabulary object detection, Gaussian Splatting [3] for 3D scene reconstruction, and ReKep [1] for task decomposition and spatial-temporal reasoning\u2014to enable robots to perform complex manipulation tasks. Specifically, the system will address tasks such as identifying and grasping objects like a cup, even in cluttered or dynamic environments. ReKep provides a novel approach to representing manipulation constraints using Relational Keypoint Con- straints (RKC), which are optimized through a hierarchical procedure to compute robot actions.\n\nApplication\n\nThe proposed framework targets applications in robotic manipulation for tasks such as pick-and-place, grasping, and task generalization in real-world environments like homes and warehouses. Using visual and language inputs (e.g., \u201dpick up a cup\u201d), the system will identify objects in 2D scenes, reconstruct their 3D representations, and compute optimal actions to achieve the task, even in scenarios involving task failure or long-horizon planning.\n\nProblems\n\nThe project involves solving several key mathematical and computational challenges:\n\nOpen-Vocabulary Object Detection and Segmentation: Efficiently identify- ing objects and generating precise masks using DinoX.\n\n3D Scene Reconstruction: Constructing rough but accurate object representa- tions using Gaussian Splatting for spatial understanding.\n\nTask Decomposition and Optimization: Formulating and solving tasks as se- quences of Relational Keypoint Constraints (RKC) using numerical optimization techniques.\n\nGeneralization and Error Handling: Developing algorithms for task failure detection and generalization across diverse tasks and environments.\n\n1\n\nTime Schedule\n\nMonth 1-2: Literature review and setup of development environment.\n\nMonth 3-4: Integration of DinoX for object detection and Gaussian Splatting for 3D reconstruction.\n\nMonth 5: Development of ReKep-based task decomposition and optimization framework.\n\nMonth 6: Final analysis, report writing, and thesis submission.\n\nReferences\n\n[1] Wenlong Huang, Chen Wang, Yunzhu Li, Ruohan Zhang, and Li Fei-Fei. Rekep: Spatio-temporal reasoning of relational keypoint constraints for robotic manipulation. arXiv preprint arXiv:2409.01652, 2024.\n\n[2] Bernhard Kerbl, Georgios Kopanas, Thomas Leimk\u00a8uhler, and George Drettakis. 3d gaussian splatting for real-time radiance field rendering. ACM Trans. Graph., 42(4):139\u20131, 2023.\n\n[3] Tianhe Ren, Yihao Chen, Qing Jiang, Zhaoyang Zeng, Yuda Xiong, Wenlong Liu, Zhengyu Ma, Junyi Shen, Yuan Gao, Xiaoke Jiang, et al. Dino-x: A unified vision model for open-world object detection and understanding. arXiv preprint arXiv:2411.14347, 2024.\n\n2",
-      "content_preview": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng X...",
-      "document_name": "1740677023.398497_Proposal.pdf",
-      "metadata": {},
-      "relevance_score": 69.8640179938826
-    },
-    {
-      "content": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng Xu & Dr. Sichao Liu\n\nBackground\n\nRobotic manipulation in unstructured environments remains a significant challenge in robotics research. This project aims to integrate techniques Dino-X [2] for open-vocabulary object detection, Gaussian Splatting [3] for 3D scene reconstruction, and ReKep [1] for task decomposition and spatial-temporal reasoning\u2014to enable robots to perform complex manipulation tasks. Specifically, the system will address tasks such as identifying and grasping objects like a cup, even in cluttered or dynamic environments. ReKep provides a novel approach to representing manipulation constraints using Relational Keypoint Con- straints (RKC), which are optimized through a hierarchical procedure to compute robot actions.\n\nApplication\n\nThe proposed framework targets applications in robotic manipulation for tasks such as pick-and-place, grasping, and task generalization in real-world environments like homes and warehouses. Using visual and language inputs (e.g., \u201dpick up a cup\u201d), the system will identify objects in 2D scenes, reconstruct their 3D representations, and compute optimal actions to achieve the task, even in scenarios involving task failure or long-horizon planning.\n\nProblems\n\nThe project involves solving several key mathematical and computational challenges:\n\nOpen-Vocabulary Object Detection and Segmentation: Efficiently identify- ing objects and generating precise masks using DinoX.\n\n3D Scene Reconstruction: Constructing rough but accurate object representa- tions using Gaussian Splatting for spatial understanding.\n\nTask Decomposition and Optimization: Formulating and solving tasks as se- quences of Relational Keypoint Constraints (RKC) using numerical optimization techniques.\n\nGeneralization and Error Handling: Developing algorithms for task failure detection and generalization across diverse tasks and environments.\n\n1\n\nTime Schedule\n\nMonth 1-2: Literature review and setup of development environment.\n\nMonth 3-4: Integration of DinoX for object detection and Gaussian Splatting for 3D reconstruction.\n\nMonth 5: Development of ReKep-based task decomposition and optimization framework.\n\nMonth 6: Final analysis, report writing, and thesis submission.\n\nReferences\n\n[1] Wenlong Huang, Chen Wang, Yunzhu Li, Ruohan Zhang, and Li Fei-Fei. Rekep: Spatio-temporal reasoning of relational keypoint constraints for robotic manipulation. arXiv preprint arXiv:2409.01652, 2024.\n\n[2] Bernhard Kerbl, Georgios Kopanas, Thomas Leimk\u00a8uhler, and George Drettakis. 3d gaussian splatting for real-time radiance field rendering. ACM Trans. Graph., 42(4):139\u20131, 2023.\n\n[3] Tianhe Ren, Yihao Chen, Qing Jiang, Zhaoyang Zeng, Yuda Xiong, Wenlong Liu, Zhengyu Ma, Junyi Shen, Yuan Gao, Xiaoke Jiang, et al. Dino-x: A unified vision model for open-world object detection and understanding. arXiv preprint arXiv:2411.14347, 2024.\n\n2",
-      "content_preview": "Master Thesis Proposal: Integration of New Computer Vision Tech for Robotic Manipulation\n\nJiacheng X...",
-      "document_name": "1740601690.601194_Proposal.pdf",
-      "metadata": {},
-      "relevance_score": 69.8640179938826
-    }
-  ]
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:20:31
-CURL COMMAND:
-curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "Summarize this document briefly", "knowledge_base_id": 10}'
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "answer": "Relational Keypoint Constraints (ReKep)  \u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u89c6\u89c9\u6570\u636e\u548c\u8bed\u8a00\u6a21\u578b\u7684\u81ea\u52a8\u751f\u6210\u7ea6\u675f\u65b9\u6cd5\uff0c\u7528\u4e8e\u63cf\u8ff0 robotic \u64cd\u4f5c\u4efb\u52a1\u4e2d\u7684\u5173\u7cfb\u3002\u901a\u8fc7\u5c06 ReKep \u7684\u6838\u5fc3\u601d\u60f3\u6982\u62ec\u4e3a\u4ee5\u4e0b\u51e0\u70b9\uff1a\n\n1. **\u89c6\u89c9\u6570\u636e\u4e0e\u8bed\u8a00\u7406\u89e3**\uff1a ReKep \u4e0d\u9700\u8981\u4eba\u5de5\u5b9a\u4e49\u5173\u952e\u70b9\uff0c\u800c\u662f\u4ece\u73af\u5883\u56fe\u50cf\u4e2d\u81ea\u52a8\u63d0\u53d6\u5e76\u7ed3\u5408\u8bed\u8a00\u6307\u4ee4\u6765\u786e\u5b9a\u8fd9\u4e9b\u5173\u952e\u70b9\u3002\n\n2. **\u89c6\u89c9 referential \u6848\u5f0f\u8868\u8fbe**\uff1a \u4f7f\u7528\u89c6\u89c9 referential \u6848\u5f0f\u8868\u793a\u6cd5\uff08\u5982\u201cobject on table\u201d\uff09\u5e2e\u52a9\u7cfb\u7edf\u7406\u89e3\u548c\u751f\u6210\u5173\u952e\u70b9\u3002\n\n3. **\u9ad8\u6548\u64cd\u4f5c**\uff1a ReKep \u7684\u7ea6\u675f\u53ef\u4ee5\u901a\u8fc7 Hierarchical \u4f18\u5316\u6d41\u7a0b\u5feb\u901f\u751f\u6210\uff0c\u9002\u7528\u4e8e\u5feb\u8282\u594f\u7684 robotic \u64cd\u4f5c\u4efb\u52a1\uff0c\u5982 10 Hz \u7684\u901f\u5ea6\uff0c\u80fd\u591f\u5b8c\u6210\u591a\u6b65\u9aa4\u64cd\u4f5c\u3002\n\n\u603b\u7ed3\u800c\u8a00\uff0cReKep \u5efa\u7acb\u4e86\u4e00\u79cd\u89c6\u89c9\u3001\u8bed\u8a00\u4e0e\u63a8\u7406\u5e76\u91cd\u7684\u65b9\u6cd5\uff0c\u4f7f robotic \u64cd\u4f5c\u4efb\u52a1\u53d8\u5f97\u66f4\u52a0\u81ea\u52a8\u5316\u548c\u9ad8\u6548\u3002",
-  "query": {
-    "kb_id": 10,
-    "original": "Summarize this document briefly"
-  },
-  "sources": [
-    {
-      "content": "A.8 Implementation Details of Sub-Goal Solver\n\nThe sub-goal problems are implemented and solved using SciPy [125]. The decision variable is a single end-effector pose (position and Euler angles) in R6 for single-arm robots and two end-effector poses in R12 for bimanual robot. The bounds for the position terms are the pre-defined workspace bounds, and the bounds for the rotation terms are that the half hemisphere where the end-effector faces down (due to the joint limits of the Franka arm, it is often likely to reach joint limit when an end-effector pose faces up). The decision variables are normalized to [\u22121,1] based on the bounds. For the first solving iteration, the initial guess is chosen to be the current end-effector pose. We use sampling-based global optimization Dual Annealing [126] in the first iteration to quickly search the full space, which is followed by a gradient-based local optimizer SLSQP [127] that refines the solution. The full procedure takes around 1 second for this iteration. In subsequent iterations, we use the solution from previous stage and only use local optimizer as it can quickly adjust to small changes. The optimization is cut off with a fixed time budget represented as number of objective function calls to keep the system running at a high frequency.\n\nWe discuss the cost terms in the objective function below.\n\nConstraint Violation: We implement constraints as cost terms in the optimization problem, where the returned costs by the ReKep functions are multiplied with large weights.\n\nScene Collision Avoidance: We use nvblox [149] with the PyTorch wrapper [58] to compute the ESDF of the scene in a separate node that runs at 20 Hz. The ESDF calculation aggregates the\n\n25\n\ndepth maps from all available cameras and excludes robot arms using cuRobo and any grasped rigid objects (tracked via a masked tracker model Cutie [136]). A collision voxel grid is then calculated using the ESDF and used by other modules in the system. In the sub-goal solver module, we first downsample the gripper points and the grasped object points to have a maximum of 30 points using farthest point sampling. Then we calculate the collision cost using the ESDF voxel grid with linear interpolation with a threshold of 15cm.\n\nReachability: Since our decision variables are end-effector poses, which may not be always reach- able by the robot arms, especially in confined spaces, we need to add a cost term that encourages finding solutions with valid joint configurations. Therefore, we solve an IK problem in each iteration of the sub-goal solver using PyBullet [133] and use its residual as a proxy for reachability. We find that this takes around 40% of the time of the full objective function. Alternatively, one may solve the problem in joint space, which would ensure the solution is within the joint limits by enforcing the bounds. We find that this is inefficient with our Python-based implementation as we need to cal- culate forward kinematics for a magnitude of more times in the path solver, because the constraints are evaluated in the task space. To address this while ensuring efficiency, future works can consider using hardware-accelerated implementations to solve the problems in joint space [58].\n\nPose Regularization: We also add a small cost that encourages the sub-goal to be close to the current end-effector pose.\n\nConsistency: Since the solver iteratively solves the problem at a high frequency and the noise from the perception pipeline may propagate to the solver, we find it useful to include a consistency cost that encourages the solution to be close to the previous solution.\n\n(Dual-Arm only) Self-Collision Avoidance: To avoid two arms collide with each other, we compute the pairwise distance between the two point sets, each including the gripper points and grasped object points.\n\nA.9\n\nImplementation Details of Path Solver\n\nThe path problems are implemented and solved using SciPy [125]. The number of decision variables is calculated based on the distance between the current end-effector pose and the target end-effector pose. Specifically, we define a fixed step size (20cm and 45 degree) and linearly approximate the desired number of \u201cintermediate poses\u201d, which are used as decision variables. As in the sub-goal problem, they are similarly represented using position and Euler angles with the same bounds. For the first solving iteration, the initial guess is chosen to be linear interpolation between the start and the target. We similarly use sampling-based global optimization followed by a gradient-based local optimizer in the first iteration and only use local optimizer in subsequent iterations. After we obtain the solution, represented as a number of intermediate poses, we fit a spline using the current pose, the intermediate poses, and the target pose, which are then densely sampled to be executed by the robot.\n\nIn the objective function, we first unnormalize the decision variables and use piecewise linear in- terpolation to obtain a dense sequence of discrete poses to represent the path (referred to as \u201cdense samples\u201d below). A spline interpolation would be aligned with how we postprocess and execute the solution, but we find linear interpolation to be computationally more efficient. Below we discuss the individual cost terms in the objective function.\n\nConstraint Violation: Similar to that in the sub-goal problem, we check violation of the ReKep constraints for each dense sample along the path and penalize with large weights.\n\nScene Collision Avoidance: The calculation is similar to the sub-goal problem, except that it is calculated for each dense sample. We ignore the collision calculation with a 5cm radius near the start and the target poses, as this tends to stabilize the solution when solved at a high frequency due to various real-world noises. We additionally add a table clearance cost that penalizes the path from penetrating the table (or the bottom of the workspace for the wheeled single-arm robot).\n\n26\n\nPath Length: We approximate the path length using the dense samples by taking the sum of their differences. Shorter paths are encouraged.\n\nReachability: We solve an IK problem for each intermediate pose inside the objective function as in the sub-goal problem. See the sub-goal solver section for more details.\n\nConsistency: As in the sub-goal problem, we encourage the solution to be close to the previous one. Specifically, we store the dense samples from the previous iteration. To calculate the solution consistency, we use the pairwise distance between the two sequences (treated as two sets) as an efficient proxy. Alternatively, Hausdorff distance can be used.\n\n(Dual-Arm only) Self-Collision Avoidance: We similarly compute self-collision avoidance for the dual-arm platform as in the sub-goal problem. We also use pairwise distance between the two sequences to efficiently calculate this cost.\n\nA.10 Comparisons with Prior Works on Visual Prompting for Manipulation\n\nThere has been several concurrent works investigating the application of visual prompting of VLMs to robotic manipulation [96\u201398, 109, 122]. Below we summarized the differences to highlight the contributions of this work.",
-      "content_preview": "A.8 Implementation Details of Sub-Goal Solver\n\nThe sub-goal problems are implemented and solved usin...",
-      "document_name": "rekep.pdf",
-      "metadata": {},
-      "relevance_score": 71.01569692256132
-    },
-    {
-      "content": "A.4.2 Details on Baseline Methods\n\nWe use VoxPoser [103] as the main baseline method as it makes similar assumptions that no task- specific data or pre-defined motion primitives are required. We adapt VoxPoser to our setting with certain modifications to ensure fairness in comparisons. Specifically, we use the same VLM, GPT- 4o [6], that takes the same camera input. We also augment the original prompt from the paper with the prompt used in this work to ensure it has sufficient context. We only use the affordance, rotation, and gripper action value maps and ignore the avoidance and velocity value maps because they are not necessary for our tasks. We also only consider the scenario where the \u201centity of interest\u201d is the robot end-effector instead of objects in the scene. The latter is tailored for pushing task, which is not being studied in this work. We use OWL-ViT [135] for open-vocabulary object detection, SAM [132] for initial-frame segmentation, and Cutie [136] for mask tracking.\n\nA.4.3 Details for Generalization in Manipulation Strategies (Section 4.2)\n\nThe dual-arm robot is tasked with folding eight different categories of clothing. We use two metrics for evaluation: \u201cStrategy Success\u201d and \u201cExecution Success,\u201d where the former evaluates whether keypoints are proposed and constraints are written appropriately, and the latter evaluates the robotic system\u2019s execution given successful strategies.\n\nTo evaluate \u201cStrategy Success,\u201d the garment is initialized close to the center of the workspace. A back-mounted RGB-D camera captures the RGB image. Then, the keypoint proposal module gen- erates keypoint candidates using the captured image, which are then overlaid on top of the original image with numerical marks {0,...,K \u2212 1}. The overlaid image, along with the same generic prompt, is fed into GPT-4 [6] to generate the ReKep constraints. Since folding garments is itself an open-ended problem without ground-truth strategies, we manually judge if the proposed keypoints and the generated constraints are correct. Note that since the constraints are to be executed by a bimanual robot, and the constraints are almost always connecting (folding) two keypoints such that they are aligned, correctness is measured by whether it is (potentially) executable by the robot with- out causing self-collision (arms crossing over to opposite sides) and whether the folding strategy can fold the garment to at most half of its original surface area.\n\nTo evaluate \u201cExecution Success,\u201d we take the generated strategies in the previous section that are marked as successful for each garment and execute the sequence on the dual-arm platform, with a total of 10 trials for each garment. Point tracking is disabled as we observe that our point tracker predicts unstable tracks when the garment is potentially folded many times. Success is measured by whether the garment is folded such that its surface area is at most half of its original surface area.\n\n22\n\nA.5\n\nImplementation Details of Keypoint Proposal\n\nHerein we describe how keypoint candidates in a scene are generated. For each platform, we use one of the mounted RGB-D cameras to capture an image of size h \u00d7 w \u00d7 3, depending on which camera has the best holistic view of the environment, as all the keypoints need to be present in the first frame for the proposed method. Given the captured image, we first use DINOv2 with registers (ViT-S14) [5, 137] to extract the patch-wise features Fpatch \u2208 Rh\u2032\u00d7w\u2032\u00d7d. Then we perform bilinear interpolation to upsample the features to the original image size, Finterp \u2208 Rh\u00d7w\u00d7d. To ensure the proposal covers all relevant objects in the scene, we extract all masks M = {m1,m2,...,mn} in the scene using Segment Anything (SAM) [132]. Within each mask mi, we apply PCA to project the features to three dimensions, FPCA = PCA(Fresized[mi],3). We find that applying PCA improves the clustering as it often removes details and artifacts related to texture that are not useful for our tasks. For each mask j, we cluster the masked features Finterp[mj] using k-means with k = 5 with the Euclidean distance metric. The median centroids of the clusters are used as keypoint candidates, which are projected to a world coordinate R3 using a calibrated RGB-D camera. Note that we also store which keypoint candidates originate from the same mask, which is later used as part of the rigidity assumption in the optimization loops described in Sec. 3.3. Candidates outside of the workspace bounds are filtered out. To avoid many points cluttered in a small region, we additionally use Mean Shift [138, 139] (with a bandwidth 8cm) to filter out points that are close to each other. Finally, the centroids are taken as final candidates. Alternatively, one may develop a pipeline using only segmentation models [132, 140], but we leave comparisons to future work.\n\nA.6 Querying Vision-Language Model\n\nAfter we obtain the keypoint candidates, they are overlaid on the captured RGB image with numer- ical marks {0,...,K \u2212 1}. Then the image and the task instruction are fed into a vision-language model with the prompt described below. The prompt contains only generic instructions with no image-text in-context examples, although a few text-based examples are given to concretely ex- plain the proposed method and the expected output from the model. Note that the majority of the investigated tasks are not discussed in the provided prompt. As a result, the VLM is tasked with generating ReKep constraints by leveraging its internalized world knowledge.\n\nFor the experiments conducted in this work, we use GPT-4o [6] as it is one of the latest available models at the time of the experiments. However, due to rapid advancement in this field, the pipeline can directly benefit from newer models that have better vision-language reasoning. Correspond- ingly, we observe different models exhibit different behaviors when given the same prompt (with the observation that newer models typically require less fine-grained instructions). As a result, in- stead of developing the best prompt for the suite of tasks in this work, we focus on demonstrating a full-stack pipeline consisting a key component that can be automated and continuously improved by future development.\n\n## Instructions Suppose you are controlling a robot to perform manipulation tasks by writing constraint functions in Python.\n\nThe manipulation task is given as an image of the environment, overlayed with keypoints marked with their indices, along with a text instruction. The instruction starts with a parenthesis indicating whether the robot has a single arm or is bimanual. For each given task, please perform the following steps:\n\nDetermine how many stages are involved in the task. Grasping must be an independent stage. Some examples:\n\n\"(single-arm) pouring tea from teapot\":\n\n3 stages: \"grasp teapot\", \"align teapot with cup opening\", and \"pour liquid\"\n\n\"(single-arm) put red block on top of blue block\":\n\n3 stages: \"grasp red block\", \"align red block on top of blue block\", and \"release red block\"\n\n\"(bimanual) fold sleeves to the center\":\n\n2 stages: \"left arm grasps left sleeve and right arm grasps right sleeve\" and \"both arms fold sleeves to\n\nthe center\" - \"(bimanual) fold a jacket\":\n\n3 stages: \"left arm grasps left sleeve and right arm grasps right sleeve\", \"both arms fold sleeves to the center\", and \"grasp the neck with one arm (the other arm stays in place)\", and \"align the neck with the bottom\"",
-      "content_preview": "A.4.2 Details on Baseline Methods\n\nWe use VoxPoser [103] as the main baseline method as it makes sim...",
-      "document_name": "rekep.pdf",
-      "metadata": {},
-      "relevance_score": 70.52287074479821
-    },
-    {
-      "content": "Task DoF: In this work, we focus on challenging tasks that require 6 DoF (single arm) or 12 DoF (two arms) motions. However, this is not trivial for existing VLMs which operate on 2D images \u2013 as quoted from MOKA [97], \u201ccurrent VLMs are not capable of reliably predicting 6-DoF motions\u201d and PIVOT [98], \u201cgeneralizing to higher dimensional spaces such as rotation poses even additional challenges\u201d. To tackle this, one key insight from ReKep is that VLMs only need to implicitly specify full 3D rotations by reasoning about keypoints in (x, y, z) Cartesian coordinates. After this, actual 3D rotations are solved by high-precision and efficient numerical solvers, effectively sidestepping the challenge of explicitly predicting 3D rotations. As a result, the same formulation also naturally generalizes to controlling multiple arms.\n\nHigh-Level Planning: While many works also consider multi-stage tasks via an language-based task planners which are independent from their methods, our formulation takes inspiration from TAMP and organically integrates high-level task planning with low-level actions in a unified contin- uous mathematical program. As a result, the method can naturally consider geometric dependencies across stages and do so at a real-time frequency. When a failure occurs, it would backtrack to a previous stage in which its conditions can still be satisfied. For example, in the \u201cpouring tea\u201d task, the robot can only start tilting the teapot when the teapot spout is aligned with the cup opening. However, if the cup is being moved in the process, it should level the teapot and re-align with the cup. Or if the teapot is being taken from the gripper, it should instead re-grasp the teapot.\n\nLow-Level Execution: A common issue with using VLMs is that it is computationally expensive to run, hindering the high-frequency perception-action feedback loops often required for many ma- nipulation tasks. As a result, most of existing works either consider the open-loop settings where visual perception is only used in the beginning or only consider the tasks where slow execution is acceptable. Instead, our formulation natively supports a high-frequency perception-action loops by coupling VLMs with a point tracker, which effectively enables reactive behaviors via closed-loop execution despite leveraging very large foundation models.\n\nVisual Prompting Methods: We uniquely consider using visual prompting for code-generation, where code may contain arbitrary arithmetic operations on a set of keypoints via visual referring expressions. Although a single point is limiting to capture complex geometric structure, multiple points and their relations can even specify vectors, surfaces, volumes, and their temporal dependen- cies. While being conceptually simple, this offers a much higher degree of flexibility which can fully specify 6 DoF or even 12 DoF motions.\n\n27\n\nA.11 Extended Discusssions on Limitations\n\nHerein we present additional limitations of the existing system.\n\nPrompting and Robustness: Although we have demonstrated that existing VLMs possess rudi- mentary capabilities at specifying ReKep constraints, we have observed that when dealing with tasks that span many stages with several temporally dependent constraints (A.14), the VLMs lack enough robustness to obtain consistent success.\n\nTask-Space Planning: To enable efficient planning, in this work we only consider planning in the task space with the end-effector poses as decision variables. However, we have observed that in certain scenarios, it may be kinematically challenging for robots to achieve the optimized poses as the solver does not explicitly account for the kinematics of the robot. Planning in joint space can likely resolve the issue but we find it to be less computationally efficient for our tasks.\n\nArticulated Object Manipulation: In this work, we do not investigate tasks involving articulated objects, as we observed this requires advanced spatial reasoning capabilities that are beyond those of existing VLMs. However, the ReKep formulation may be extended to such tasks by representing different types of joints also by \u201crelations of keypoints\u201d. For example, ReKep constraints can be written to constrain certain keypoints to move only alongside a line (prismatic joints) or a curve (revolute joints). To extend to these scenarios, finetuning may be required as in [150\u2013152].\n\nBimanual Coordination: Although we demonstrate the application of ReKep to bimanual manipu- lation, we also identify several important limitations in this domain. Notably, the challenges can be roughly categorized into those pertaining to semantic reasoning of keypoint relations by the VLM and those pertaining to solving for bimanual motions by the optimization solver. For semantic rea- soning, to achieve bimanual folding, the VLM needs to possess certain spatial knowledge about which steps should/can be performed together by both arms. For example, the bottom of a shirt often needs to be grasped by two hands, each at one corner, in order to fold it upwards to align with the collar. Another example in blanket folding is to recognize that the bottom-left corner should be aligned with the top-left corner and the bottom-right corner should be aligned with the top-right corner, as other matching may lead to self-collision. For optimization solver, as bimanual motion planning dramatically increases the search space of possible motions, which slows down the overall pipeline and more frequently produces less optimal behaviors.\n\nA.12 Simulation Experiments\n\nWe additionally implement ReKep in OmniGibson [153] for the Pour Tea task. It is compared to a monolithic learning-based baseline based on the transformer architecture [154] adopted from RVT [155, 156]. The baseline is trained via imitation learning on 100 expert demonstrations, where demonstrations are from scripted policies using privileged simulation information. Success rates are averaged across 100 trials and reported below. Although the monolithic policy excels in training scenarios given its access to expert demonstrations, we observe that ReKep performs significantly stronger in unseen settings, and more importantly, without the need of expert demonstrations.\n\nSeen Poses Unseen Poses Unseen Objects\n\nMonolithic Policy ReKep (Zero-Shot)\n\n0.93 0.75\n\n0.31 0.68\n\n0.14 0.72\n\nA.13 Comparisons of Visual Feature Extractors for Keypoint Proposal\n\nHerein we provide qualitative comparisons of different methods for keypoint proposal. We compare three pre-trained visual feature extractors, each of which represents a popular class of pre-training methods: DINOv2 [5] (self-supervised pre-training), CLIP [91] (vision-language contrastive pre- training), and ViT [157] (supervised pre-training). We also compare to a variant that does not use\n\n28\n\nSegment Anything (SAM) [132] for its objectness prior. In Fig. 8, we show the extracted feature maps (projected to RGB space) and their clustered keypoints for three different scenes.",
-      "content_preview": "Task DoF: In this work, we focus on challenging tasks that require 6 DoF (single arm) or 12 DoF (two...",
-      "document_name": "rekep.pdf",
-      "metadata": {},
-      "relevance_score": 68.3179362477918
-    },
-    {
-      "content": "ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation\n\nWenlong Huang1, Chen Wang1\u2217, Yunzhu Li2\u2217, Ruohan Zhang1, Li Fei-Fei1\n\n1Stanford University\n\n2Columbia University\n\nAbstract: Representing robotic manipulation tasks as constraints that associate the robot and the environment is a promising way to encode desired robot be- haviors. However, it remains unclear how to formulate the constraints such that they are 1) versatile to diverse tasks, 2) free of manual labeling, and 3) optimiz- able by off-the-shelf solvers to produce robot actions in real-time. In this work, we introduce Relational Keypoint Constraints (ReKep), a visually-grounded repre- sentation for constraints in robotic manipulation. Specifically, ReKep is expressed as Python functions mapping a set of 3D keypoints in the environment to a numer- ical cost. We demonstrate that by representing a manipulation task as a sequence of Relational Keypoint Constraints, we can employ a hierarchical optimization procedure to solve for robot actions (represented by a sequence of end-effector poses in SE(3)) with a perception-action loop at a real-time frequency. Further- more, in order to circumvent the need for manual specification of ReKep for each new task, we devise an automated procedure that leverages large vision models and vision-language models to produce ReKep from free-form language instruc- tions and RGB-D observations. We present system implementations on a wheeled single-arm platform and a stationary dual-arm platform that can perform a large variety of manipulation tasks, featuring multi-stage, in-the-wild, bimanual, and reactive behaviors, all without task-specific data or environment models. Videos and code can be found at rekep-robot.github.io.\n\nPourteaintothecup.\n\nActionsMulti-StageIn-The-WildBimanualReactive\n\nVision-LanguageModel\n\nOptimizationSolver\n\nRelationalKeypointConstraintsInput:Output:Cost\u2026\n\nLargeVisionModel\n\nFigure 1: Relational Keypoint Constraints (ReKep) specify diverse manipulation behaviors as an opti- mizable spatio-temporal series of constraint functions operating on semantic keypoints. In the pouring task, one ReKep first constrains the grasping location at the handle of the teapot (blue). A subsequent ReKep pulls the teapot spout (red) towards the top of the cup opening (green) while another ReKep constrains the desired rotation of the teapot by associating the vector formed by the handle (blue) and the spout (red).\n\nDenotes equal contribution. Correspondence to Wenlong Huang <wenlongh@stanford.edu>.\n\n1\n\nIntroduction\n\nRobotic manipulation involves intricate interactions with objects in the environment, which can of- ten be expressed as constraints in both spatial and temporal domains. Consider the task of pouring tea into a cup in Fig. 1: the robot must grasp at the handle, keep the cup upright while transporting it, align the spout with the target container, and then tilt the cup at the correct angle to pour. Here, the constraints encode not only the intermediate sub-goals (e.g., align the spout) but also the transi- tioning behaviors (e.g., keep the cup upright in transportation), which collectively dictate the spatial, timing, and other combinatorial requirements of the robot\u2019s actions in relation to the environment.\n\nHowever, effectively formulating these constraints for a large variety of real-world tasks presents significant challenges. While representing constraints using relative poses between robots and ob- jects is a direct and widely-used approach [1], rigid-body transformations do not depict geometric details, require obtaining object models a priori, and cannot work on deformable objects. On the other hand, data-driven approaches enable learning constraints directly in visual space [2, 3]. While more flexible, it remains unclear how to effectively collect training data as the number of constraints grows combinatorially in terms of objects and tasks. Therefore, we ask the question: how can we represent constraints in manipulation that are 1) widely applicable: adaptable to tasks that require multi-stage, in-the-wild, bimanual, and reactive behaviors, 2) scalably obtainable: have the potential to be fully automated through the advances in foundation models, and 3) real-time optimizable: can be efficiently solved by off-the-shelf solvers to produce complex manipulation behaviors?\n\nIn this work, we propose Relational Keypoint Constraints (ReKep). Specifically, ReKep repre- sents constraints as Python functions that map a set of keypoints to a numerical cost, where each keypoint is a task-specific and semantically meaningful 3D point in the scene. Each function is composed of (potentially nonlinear) arithmetic operations on the keypoints and encodes a desired \u201crelation\u201d between them, where the keypoints may belong to different entities in the environment, such as the robot arms, object parts, and other agents. While each keypoint only consists of its 3D Cartesian coordinates in the world frame, multiple keypoints can collectively specify lines, surfaces, and/or 3D rotations if rigidity between keypoints is enforced. We study ReKep in the context of the sequential manipulation problem, where each task involves multiple stages that have spatio-temporal dependencies (e.g., \u201cgrasping\u201d, \u201caligning\u201d, and \u201cpouring\u201d in the aforementioned example).\n\nWhile constraints are typically defined manually per task [4], we demonstrate the specific form of ReKep possesses a unique advantage in that they can be automated by pre-trained large vi- sion models (LVM) [5] and vision-language models (VLM) [6], enabling in-the-wild specification of ReKep from RGB-D observations and free-form language instructions. Specifically, we leverage LVM to propose fine-grained and semantically meaningful keypoints in the scene and VLM to write the constraints as Python functions from visual input overlaid with proposed keypoints. This process can be interpreted as grounding fine-grained spatial relations, often those not easily specified with natural language, in an output modality supported by VLM (code) using visual referral expressions.\n\nWith the generated constraints, off-the-shelf solvers can be used to produce robot actions by re- evaluating the constraints based on tracked keypoints. Inspired by [7], we employ a hierarchical optimization procedure to first solve a set of waypoints as sub-goals (represented as SE(3) end- effector poses) and then solve the receding-horizon control problem to obtain a dense sequence of actions to achieve each sub-goal. With appropriate instantiation of the problem, we demonstrate that it can be reliably solved at approximately 10 Hz for the tasks considered in this work.\n\nOur contributions are summarized as follows: 1) We formulate manipulation tasks as a hierarchical optimization problem with Relational Keypoint Constraints; 2) We devise a pipeline to automatically specify keypoints and constraints using large vision models and vision-language models; 3) We present system implementations on two real-robot platforms that take as input a language instruction and RGB-D observations, and produce multi-stage, in-the-wild, bimanual, and reactive behaviors for a large variety of manipulation tasks, all without task-specific data or environment models.\n\n2\n\n2 Related Works",
-      "content_preview": "ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation\n\nWenlon...",
-      "document_name": "rekep.pdf",
-      "metadata": {},
-      "relevance_score": 68.2286187181414
-    }
-  ]
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:20:31
-CURL COMMAND:
-curl -X DELETE http://localhost:8080/documents/14
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "message": "document deleted"
-}
-
-
-================================================================================
-TIMESTAMP: 2025-03-04 00:20:31
-CURL COMMAND:
-curl -X DELETE http://localhost:8080/knowledge-bases/10
-
-RESPONSE STATUS: 200
-RESPONSE BODY:
-{
-  "message": "knowledge base deleted"
 }
