@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS  # Import the CORS extension
 from embed import embed_document
 from query import perform_query
 from db_utils import init_database, get_db_connection
@@ -17,6 +18,8 @@ os.makedirs(DOCS_STORAGE, exist_ok=True)
 
 # 初始化Flask应用
 app = Flask(__name__)
+# Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 初始化数据库
 init_database(DB_PATH)

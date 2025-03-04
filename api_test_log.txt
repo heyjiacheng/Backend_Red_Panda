@@ -1,10 +1,10 @@
 RED PANDA BACKEND API TEST LOG
-Generated on: 2025-03-04 00:30:35
+Generated on: 2025-03-04 20:43:50
 ================================================================================
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:35
+TIMESTAMP: 2025-03-04 20:43:50
 CURL COMMAND:
 curl -X GET http://localhost:8080/knowledge-bases
 
@@ -29,20 +29,20 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:35
+TIMESTAMP: 2025-03-04 20:43:50
 CURL COMMAND:
 curl -X POST http://localhost:8080/knowledge-bases -H "Content-Type: application/json" -d '{"name": "Test Knowledge Base", "description": "Testing the API functionality"}'
 
 RESPONSE STATUS: 201
 RESPONSE BODY:
 {
-  "knowledge_base_id": 11,
+  "knowledge_base_id": 12,
   "message": "success with knowledge"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:35
+TIMESTAMP: 2025-03-04 20:43:50
 CURL COMMAND:
 curl -X GET http://localhost:8080/knowledge-bases
 
@@ -51,9 +51,9 @@ RESPONSE BODY:
 {
   "knowledge_bases": [
     {
-      "created_at": "2025-03-03 23:30:35",
+      "created_at": "2025-03-04 19:43:50",
       "description": "Testing the API functionality",
-      "id": 11,
+      "id": 12,
       "name": "Test Knowledge Base"
     },
     {
@@ -73,25 +73,25 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:35
+TIMESTAMP: 2025-03-04 20:43:50
 CURL COMMAND:
-curl -X GET http://localhost:8080/knowledge-bases/11
+curl -X GET http://localhost:8080/knowledge-bases/12
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "created_at": "2025-03-03 23:30:35",
+  "created_at": "2025-03-04 19:43:50",
   "description": "Testing the API functionality",
   "documents": [],
-  "id": 11,
+  "id": 12,
   "name": "Test Knowledge Base"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:35
+TIMESTAMP: 2025-03-04 20:43:50
 CURL COMMAND:
-curl -X PUT http://localhost:8080/knowledge-bases/11 -H "Content-Type: application/json" -d '{"name": "Updated Test Knowledge Base", "description": "Updated description for testing"}'
+curl -X PUT http://localhost:8080/knowledge-bases/12 -H "Content-Type: application/json" -d '{"name": "Updated Test Knowledge Base", "description": "Updated description for testing"}'
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
@@ -101,21 +101,21 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:46
+TIMESTAMP: 2025-03-04 20:44:02
 CURL COMMAND:
-curl -X POST http://localhost:8080/upload/11 -F file=@/Users/jiadengxu/Documents/rekep.pdf
+curl -X POST http://localhost:8080/upload/12 -F file=@/Users/jiadengxu/Documents/rekep.pdf
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "document_id": 15,
-  "knowledge_base_id": 11,
+  "document_id": 16,
+  "knowledge_base_id": 12,
   "message": "success with embedding"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:49
+TIMESTAMP: 2025-03-04 20:44:05
 CURL COMMAND:
 curl -X GET http://localhost:8080/documents
 
@@ -125,10 +125,10 @@ RESPONSE BODY:
   "documents": [
     {
       "file_size": 13823419,
-      "id": 15,
-      "knowledge_base_id": 11,
+      "id": 16,
+      "knowledge_base_id": 12,
       "original_filename": "rekep.pdf",
-      "upload_date": "2025-03-03 23:30:46"
+      "upload_date": "2025-03-04 19:44:02"
     },
     {
       "file_size": 24343676,
@@ -170,33 +170,33 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:30:49
+TIMESTAMP: 2025-03-04 20:44:05
 CURL COMMAND:
-curl -X GET http://localhost:8080/documents/15
+curl -X GET http://localhost:8080/documents/16
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "file_path": "./documents/1741044635.914281_rekep.pdf",
+  "file_path": "./documents/1741117430.573758_rekep.pdf",
   "file_size": 13823419,
-  "id": 15,
-  "knowledge_base_id": 11,
+  "id": 16,
+  "knowledge_base_id": 12,
   "metadata": null,
   "original_filename": "rekep.pdf",
-  "stored_filename": "1741044635.914281_rekep.pdf",
-  "upload_date": "2025-03-03 23:30:46"
+  "stored_filename": "1741117430.573758_rekep.pdf",
+  "upload_date": "2025-03-04 19:44:02"
 }
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:31:22
+TIMESTAMP: 2025-03-04 20:44:38
 CURL COMMAND:
 curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What are the key points in this document?"}'
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "answer": "Die wichtigsten Pfeile der Datei sind:  \n1. **Dino-X für Object-Understanding**:  \n   - Einen algorithmischen Algorithmus für die visuelle Bildanalyse von Objecten in der Realty.  \n   - Focuseder Schutz für Fehler during complexe Rechnungen.  \n\n2. **Gaussian Splatting für 3D-Rekonstruktion**:  \n   - Einen Algorithmus, um Detailed Darstellung von Objects in 3D-Raum zu erstellen.  \n   - Bedürftig für工业-Anweltsspezifische Anwendungsmены wie Fertigungskathome oder Prozesse in Umschauen.  \n\n3. **Bereitschaft und Kreativität**:  \n   - Hans ERHÖLTE von den Anforderungen des Workshops, insbesondere die Analyse komplexerer Softwaresprachen.  \n   - Die Fokus sind auf der Integration mathematischer Modelle mit realen hardware-Anwendungsansätze.  \n\n4. **Teamwork und Team-Konzeption**:  \n   - Die Co-Arbeitung von Groupenmitmensch in einem Interaktiven Team, das eine hervorragende Out performance erzielt.  \n   - Der Team arbeitet an der Entwurfsgeschriptsammlung eines Self-Driving-Car-Kalender, was eine hohes Ranking erzielt.  \n\n5. **Forschungsintegrierung**:  \n   - Einen Schwerpunkt auf der visuellen Bildanalyse in Realität und der Roboticustaffenerkh legung.  \n   - Die Fokus sind auf den Integration von algorithmischen Modelle mit realen hardware-Anwendungsansätzen.  \n\n6. **Digitale Wiedergabe von LLMs**:  \n   - Einen Ansatz, um eine kürzende Darstellung von Large Language Models zu erstellen, was bei der Team-Konzeption ein breakthrough erzielt.",
+  "answer": "**Key Points in the Document:**\n\n1. ** hired by SICK Sensor Intelligence for hands-on experience:** The document highlights the opportunity to engage with engineering applications of machine vision techniques used in industry settings, particularly relevant for robotics projects.\n\n2. **Interests in integrating math with real-world applications:** It emphasizes his goal of bridging mathematical models and hardware development, especially in robotics, showcasing a clear career alignment.\n\n3. **Knowledge from KTH's Applied Mathematics program:** He gained expertise in GPU programming, Computer Vision, and Machine Learning during his Master’s studies, providing a strong foundation for applying theoretical knowledge.\n\n4. **Applications in industrial settings:** His work on Dino-x for robotic manipulation demonstrates practical application of theoretical techniques in real-world scenarios, aligning with SICK's focus on industrial applications.\n\n5. **Thesis on Object Understanding:** The document details his thesis project using Dino-x to inform UR5 robotic arm manipulation, showcasing hands-on experience in applying vision techniques to robotics.\n\n6. **Background project on self-driving cars:** His Bachelor’s thesis involved a team effort, indicating versatility and practical application across different fields, from academic to engineering challenges.\n\n7. **Skills in AI frontier projects and data processing:** Beyond academics, he's self-motivated and skilled in AI applications, particularly in data processing, as part of his broader skill set.\n\nThese points collectively illustrate the document's focus on hands-on experience, practical application of vision techniques, and alignment with SICK Sensor Intelligence's goals.",
   "query": {
     "kb_id": null,
     "original": "What are the key points in this document?"
@@ -235,16 +235,16 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:31:43
+TIMESTAMP: 2025-03-04 20:44:57
 CURL COMMAND:
-curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "Summarize this document briefly", "knowledge_base_id": 11}'
+curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "Summarize this document briefly", "knowledge_base_id": 12}'
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
 {
-  "answer": "Relational Keypoint Constraints (ReKep) proposes a method for robotic manipulation by representing constraints as Python functions. Each function maps 3D keypoints to costs, enabling semantically meaningful spatial relationships. ReKep uses large vision models and VLM to create fine-grained keypoint definitions from RGB-D data, allowing automated constraint specification in the context of real-world tasks. The approach forms a hierarchical optimization problem, solving sub-goals first before generating actions. This method handles diverse manipulability through automation and scalability.",
+  "answer": "Relational Keypoint Constraints (ReKep) is a novel method for robot manipulation that represents constraints using Python functions mapping keypoint locations to numerical costs. Keypoints are 3D points in the world frame, and constraints can be lines or surfaces enforcing rigidity. This approach captures relationships between objects without manual steps. Using large vision models (LVM) and vision-language models (VLM), it automatically defines these constraints from RGB-D data and language instructions, enabling efficient processing on real robots through hierarchical optimization.",
   "query": {
-    "kb_id": 11,
+    "kb_id": 12,
     "original": "Summarize this document briefly"
   },
   "sources": [
@@ -270,7 +270,7 @@ RESPONSE BODY:
       "relevance_score": 68.3179362477918
     },
     {
-      "content": "ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation\n\nWenlong Huang1, Chen Wang1∗, Yunzhu Li2∗, Ruohan Zhang1, Li Fei-Fei1\n\n1Stanford University\n\n2Columbia University\n\nAbstract: Representing robotic manipulation tasks as constraints that associate the robot and the environment is a promising way to encode desired robot be- haviors. However, it remains unclear how to formulate the constraints such that they are 1) versatile to diverse tasks, 2) free of manual labeling, and 3) optimiz- able by off-the-shelf solvers to produce robot actions in real-time. In this work, we introduce Relational Keypoint Constraints (ReKep), a visually-grounded repre- sentation for constraints in robotic manipulation. Specifically, ReKep is expressed as Python functions mapping a set of 3D keypoints in the environment to a numer- ical cost. We demonstrate that by representing a manipulation task as a sequence of Relational Keypoint Constraints, we can employ a hierarchical optimization procedure to solve for robot actions (represented by a sequence of end-effector poses in SE(3)) with a perception-action loop at a real-time frequency. Further- more, in order to circumvent the need for manual specification of ReKep for each new task, we devise an automated procedure that leverages large vision models and vision-language models to produce ReKep from free-form language instruc- tions and RGB-D observations. We present system implementations on a wheeled single-arm platform and a stationary dual-arm platform that can perform a large variety of manipulation tasks, featuring multi-stage, in-the-wild, bimanual, and reactive behaviors, all without task-specific data or environment models. Videos and code can be found at rekep-robot.github.io.\n\nRelationalKeypointConstraintsInput:Output:Cost…\n\nActionsMulti-StageIn-The-WildBimanualReactive\n\nLargeVisionModel\n\nVision-LanguageModel\n\nOptimizationSolver\n\nPourteaintothecup.\n\nFigure 1: Relational Keypoint Constraints (ReKep) specify diverse manipulation behaviors as an opti- mizable spatio-temporal series of constraint functions operating on semantic keypoints. In the pouring task, one ReKep first constrains the grasping location at the handle of the teapot (blue). A subsequent ReKep pulls the teapot spout (red) towards the top of the cup opening (green) while another ReKep constrains the desired rotation of the teapot by associating the vector formed by the handle (blue) and the spout (red).\n\nDenotes equal contribution. Correspondence to Wenlong Huang <wenlongh@stanford.edu>.\n\n1\n\nIntroduction\n\nRobotic manipulation involves intricate interactions with objects in the environment, which can of- ten be expressed as constraints in both spatial and temporal domains. Consider the task of pouring tea into a cup in Fig. 1: the robot must grasp at the handle, keep the cup upright while transporting it, align the spout with the target container, and then tilt the cup at the correct angle to pour. Here, the constraints encode not only the intermediate sub-goals (e.g., align the spout) but also the transi- tioning behaviors (e.g., keep the cup upright in transportation), which collectively dictate the spatial, timing, and other combinatorial requirements of the robot’s actions in relation to the environment.\n\nHowever, effectively formulating these constraints for a large variety of real-world tasks presents significant challenges. While representing constraints using relative poses between robots and ob- jects is a direct and widely-used approach [1], rigid-body transformations do not depict geometric details, require obtaining object models a priori, and cannot work on deformable objects. On the other hand, data-driven approaches enable learning constraints directly in visual space [2, 3]. While more flexible, it remains unclear how to effectively collect training data as the number of constraints grows combinatorially in terms of objects and tasks. Therefore, we ask the question: how can we represent constraints in manipulation that are 1) widely applicable: adaptable to tasks that require multi-stage, in-the-wild, bimanual, and reactive behaviors, 2) scalably obtainable: have the potential to be fully automated through the advances in foundation models, and 3) real-time optimizable: can be efficiently solved by off-the-shelf solvers to produce complex manipulation behaviors?\n\nIn this work, we propose Relational Keypoint Constraints (ReKep). Specifically, ReKep repre- sents constraints as Python functions that map a set of keypoints to a numerical cost, where each keypoint is a task-specific and semantically meaningful 3D point in the scene. Each function is composed of (potentially nonlinear) arithmetic operations on the keypoints and encodes a desired “relation” between them, where the keypoints may belong to different entities in the environment, such as the robot arms, object parts, and other agents. While each keypoint only consists of its 3D Cartesian coordinates in the world frame, multiple keypoints can collectively specify lines, surfaces, and/or 3D rotations if rigidity between keypoints is enforced. We study ReKep in the context of the sequential manipulation problem, where each task involves multiple stages that have spatio-temporal dependencies (e.g., “grasping”, “aligning”, and “pouring” in the aforementioned example).\n\nWhile constraints are typically defined manually per task [4], we demonstrate the specific form of ReKep possesses a unique advantage in that they can be automated by pre-trained large vi- sion models (LVM) [5] and vision-language models (VLM) [6], enabling in-the-wild specification of ReKep from RGB-D observations and free-form language instructions. Specifically, we leverage LVM to propose fine-grained and semantically meaningful keypoints in the scene and VLM to write the constraints as Python functions from visual input overlaid with proposed keypoints. This process can be interpreted as grounding fine-grained spatial relations, often those not easily specified with natural language, in an output modality supported by VLM (code) using visual referral expressions.\n\nWith the generated constraints, off-the-shelf solvers can be used to produce robot actions by re- evaluating the constraints based on tracked keypoints. Inspired by [7], we employ a hierarchical optimization procedure to first solve a set of waypoints as sub-goals (represented as SE(3) end- effector poses) and then solve the receding-horizon control problem to obtain a dense sequence of actions to achieve each sub-goal. With appropriate instantiation of the problem, we demonstrate that it can be reliably solved at approximately 10 Hz for the tasks considered in this work.\n\nOur contributions are summarized as follows: 1) We formulate manipulation tasks as a hierarchical optimization problem with Relational Keypoint Constraints; 2) We devise a pipeline to automatically specify keypoints and constraints using large vision models and vision-language models; 3) We present system implementations on two real-robot platforms that take as input a language instruction and RGB-D observations, and produce multi-stage, in-the-wild, bimanual, and reactive behaviors for a large variety of manipulation tasks, all without task-specific data or environment models.\n\n2\n\n2 Related Works",
+      "content": "ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation\n\nWenlong Huang1, Chen Wang1∗, Yunzhu Li2∗, Ruohan Zhang1, Li Fei-Fei1\n\n1Stanford University\n\n2Columbia University\n\nAbstract: Representing robotic manipulation tasks as constraints that associate the robot and the environment is a promising way to encode desired robot be- haviors. However, it remains unclear how to formulate the constraints such that they are 1) versatile to diverse tasks, 2) free of manual labeling, and 3) optimiz- able by off-the-shelf solvers to produce robot actions in real-time. In this work, we introduce Relational Keypoint Constraints (ReKep), a visually-grounded repre- sentation for constraints in robotic manipulation. Specifically, ReKep is expressed as Python functions mapping a set of 3D keypoints in the environment to a numer- ical cost. We demonstrate that by representing a manipulation task as a sequence of Relational Keypoint Constraints, we can employ a hierarchical optimization procedure to solve for robot actions (represented by a sequence of end-effector poses in SE(3)) with a perception-action loop at a real-time frequency. Further- more, in order to circumvent the need for manual specification of ReKep for each new task, we devise an automated procedure that leverages large vision models and vision-language models to produce ReKep from free-form language instruc- tions and RGB-D observations. We present system implementations on a wheeled single-arm platform and a stationary dual-arm platform that can perform a large variety of manipulation tasks, featuring multi-stage, in-the-wild, bimanual, and reactive behaviors, all without task-specific data or environment models. Videos and code can be found at rekep-robot.github.io.\n\nVision-LanguageModel\n\nLargeVisionModel\n\nPourteaintothecup.\n\nOptimizationSolver\n\nActionsMulti-StageIn-The-WildBimanualReactive\n\nRelationalKeypointConstraintsInput:Output:Cost…\n\nFigure 1: Relational Keypoint Constraints (ReKep) specify diverse manipulation behaviors as an opti- mizable spatio-temporal series of constraint functions operating on semantic keypoints. In the pouring task, one ReKep first constrains the grasping location at the handle of the teapot (blue). A subsequent ReKep pulls the teapot spout (red) towards the top of the cup opening (green) while another ReKep constrains the desired rotation of the teapot by associating the vector formed by the handle (blue) and the spout (red).\n\nDenotes equal contribution. Correspondence to Wenlong Huang <wenlongh@stanford.edu>.\n\n1\n\nIntroduction\n\nRobotic manipulation involves intricate interactions with objects in the environment, which can of- ten be expressed as constraints in both spatial and temporal domains. Consider the task of pouring tea into a cup in Fig. 1: the robot must grasp at the handle, keep the cup upright while transporting it, align the spout with the target container, and then tilt the cup at the correct angle to pour. Here, the constraints encode not only the intermediate sub-goals (e.g., align the spout) but also the transi- tioning behaviors (e.g., keep the cup upright in transportation), which collectively dictate the spatial, timing, and other combinatorial requirements of the robot’s actions in relation to the environment.\n\nHowever, effectively formulating these constraints for a large variety of real-world tasks presents significant challenges. While representing constraints using relative poses between robots and ob- jects is a direct and widely-used approach [1], rigid-body transformations do not depict geometric details, require obtaining object models a priori, and cannot work on deformable objects. On the other hand, data-driven approaches enable learning constraints directly in visual space [2, 3]. While more flexible, it remains unclear how to effectively collect training data as the number of constraints grows combinatorially in terms of objects and tasks. Therefore, we ask the question: how can we represent constraints in manipulation that are 1) widely applicable: adaptable to tasks that require multi-stage, in-the-wild, bimanual, and reactive behaviors, 2) scalably obtainable: have the potential to be fully automated through the advances in foundation models, and 3) real-time optimizable: can be efficiently solved by off-the-shelf solvers to produce complex manipulation behaviors?\n\nIn this work, we propose Relational Keypoint Constraints (ReKep). Specifically, ReKep repre- sents constraints as Python functions that map a set of keypoints to a numerical cost, where each keypoint is a task-specific and semantically meaningful 3D point in the scene. Each function is composed of (potentially nonlinear) arithmetic operations on the keypoints and encodes a desired “relation” between them, where the keypoints may belong to different entities in the environment, such as the robot arms, object parts, and other agents. While each keypoint only consists of its 3D Cartesian coordinates in the world frame, multiple keypoints can collectively specify lines, surfaces, and/or 3D rotations if rigidity between keypoints is enforced. We study ReKep in the context of the sequential manipulation problem, where each task involves multiple stages that have spatio-temporal dependencies (e.g., “grasping”, “aligning”, and “pouring” in the aforementioned example).\n\nWhile constraints are typically defined manually per task [4], we demonstrate the specific form of ReKep possesses a unique advantage in that they can be automated by pre-trained large vi- sion models (LVM) [5] and vision-language models (VLM) [6], enabling in-the-wild specification of ReKep from RGB-D observations and free-form language instructions. Specifically, we leverage LVM to propose fine-grained and semantically meaningful keypoints in the scene and VLM to write the constraints as Python functions from visual input overlaid with proposed keypoints. This process can be interpreted as grounding fine-grained spatial relations, often those not easily specified with natural language, in an output modality supported by VLM (code) using visual referral expressions.\n\nWith the generated constraints, off-the-shelf solvers can be used to produce robot actions by re- evaluating the constraints based on tracked keypoints. Inspired by [7], we employ a hierarchical optimization procedure to first solve a set of waypoints as sub-goals (represented as SE(3) end- effector poses) and then solve the receding-horizon control problem to obtain a dense sequence of actions to achieve each sub-goal. With appropriate instantiation of the problem, we demonstrate that it can be reliably solved at approximately 10 Hz for the tasks considered in this work.\n\nOur contributions are summarized as follows: 1) We formulate manipulation tasks as a hierarchical optimization problem with Relational Keypoint Constraints; 2) We devise a pipeline to automatically specify keypoints and constraints using large vision models and vision-language models; 3) We present system implementations on two real-robot platforms that take as input a language instruction and RGB-D observations, and produce multi-stage, in-the-wild, bimanual, and reactive behaviors for a large variety of manipulation tasks, all without task-specific data or environment models.\n\n2\n\n2 Related Works",
       "content_preview": "ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation\n\nWenlon...",
       "document_name": "rekep.pdf",
       "metadata": {},
@@ -281,9 +281,9 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:31:43
+TIMESTAMP: 2025-03-04 20:44:57
 CURL COMMAND:
-curl -X DELETE http://localhost:8080/documents/15
+curl -X DELETE http://localhost:8080/documents/16
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
@@ -293,9 +293,9 @@ RESPONSE BODY:
 
 
 ================================================================================
-TIMESTAMP: 2025-03-04 00:31:43
+TIMESTAMP: 2025-03-04 20:44:57
 CURL COMMAND:
-curl -X DELETE http://localhost:8080/knowledge-bases/11
+curl -X DELETE http://localhost:8080/knowledge-bases/12
 
 RESPONSE STATUS: 200
 RESPONSE BODY:
