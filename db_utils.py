@@ -81,4 +81,180 @@ def check_knowledge_base_exists(db_path, kb_id):
     cursor.execute("SELECT id FROM knowledge_bases WHERE id = ?", (kb_id,))
     exists = cursor.fetchone() is not None
     conn.close()
-    return exists 
+    return exists
+
+def save_conversation_message(db_path, conversation_id, message_type, content, sources=None):
+    """
+    保存对话消息到数据库
+    
+    参数:
+        db_path: 数据库路径
+        conversation_id: 对话ID
+        message_type: 消息类型 ('user' 或 'assistant')
+        content: 消息内容
+        sources: 引用的源信息 (JSON字符串)
+        
+    返回:
+        int: 新消息的ID
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    
+    # 保存消息
+    cursor.execute(
+        "INSERT INTO conversation_messages (conversation_id, message_type, content, sources) VALUES (?, ?, ?, ?)",
+        (conversation_id, message_type, content, sources)
+    )
+    
+    # 更新对话的更新时间
+    cursor.execute(
+        "UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        (conversation_id,)
+    )
+    
+    message_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return message_id
+
+def create_conversation(db_path, title, kb_id=None):
+    """
+    创建新的对话历史记录
+    
+    参数:
+        db_path: 数据库路径
+        title: 对话标题
+        kb_id: 知识库ID (可选)
+        
+    返回:
+        int: 新对话的ID
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        "INSERT INTO conversations (title, knowledge_base_id) VALUES (?, ?)",
+        (title, kb_id)
+    )
+    
+    conversation_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return conversation_id
+
+def get_conversation(db_path, conversation_id):
+    """
+    获取单个对话的详细信息和所有消息
+    
+    参数:
+        db_path: 数据库路径
+        conversation_id: 对话ID
+        
+    返回:
+        dict: 包含对话详情和消息列表的字典
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    
+    # 获取对话详情
+    cursor.execute(
+        "SELECT * FROM conversations WHERE id = ?", 
+        (conversation_id,)
+    )
+    conversation = cursor.fetchone()
+    
+    if not conversation:
+        conn.close()
+        return None
+    
+    # 获取该对话的所有消息
+    cursor.execute(
+        "SELECT * FROM conversation_messages WHERE conversation_id = ? ORDER BY created_at ASC",
+        (conversation_id,)
+    )
+    messages = [dict(row) for row in cursor.fetchall()]
+    
+    # 转换为字典
+    conversation_dict = dict(conversation)
+    conversation_dict['messages'] = messages
+    
+    conn.close()
+    return conversation_dict
+
+def get_conversations(db_path, kb_id=None, limit=20, offset=0):
+    """
+    获取对话列表，可按知识库筛选
+    
+    参数:
+        db_path: 数据库路径
+        kb_id: 知识库ID (可选)
+        limit: 返回的最大记录数
+        offset: 分页起始位置
+        
+    返回:
+        list: 对话列表
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    
+    # 构建查询SQL
+    query = "SELECT * FROM conversations"
+    params = []
+    
+    if kb_id:
+        query += " WHERE knowledge_base_id = ?"
+        params.append(kb_id)
+    
+    query += " ORDER BY updated_at DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    
+    cursor.execute(query, params)
+    conversations = [dict(row) for row in cursor.fetchall()]
+    
+    # 获取每个对话的最后一条消息
+    for conv in conversations:
+        cursor.execute(
+            "SELECT * FROM conversation_messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 1",
+            (conv['id'],)
+        )
+        last_message = cursor.fetchone()
+        if last_message:
+            conv['last_message'] = dict(last_message)
+    
+    conn.close()
+    return conversations
+
+def delete_conversation(db_path, conversation_id):
+    """
+    删除对话及其所有消息
+    
+    参数:
+        db_path: 数据库路径
+        conversation_id: 对话ID
+        
+    返回:
+        bool: 是否成功删除
+    """
+    conn = get_db_connection(db_path)
+    cursor = conn.cursor()
+    
+    try:
+        # 检查对话是否存在
+        cursor.execute("SELECT id FROM conversations WHERE id = ?", (conversation_id,))
+        if not cursor.fetchone():
+            conn.close()
+            return False
+        
+        # 删除所有相关消息
+        cursor.execute("DELETE FROM conversation_messages WHERE conversation_id = ?", (conversation_id,))
+        
+        # 删除对话
+        cursor.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
+        
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"删除对话时出错: {str(e)}")
+        conn.close()
+        return False 

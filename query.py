@@ -164,6 +164,9 @@ def clean_llm_response(response: str) -> str:
     返回:
         str: 清理后的响应
     """
+    if not response:
+        return "抱歉，无法生成回答。"
+    
     # 移除<think>...</think>块
     import re
     response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
@@ -173,10 +176,24 @@ def clean_llm_response(response: str) -> str:
     response = re.sub(r'\*\*thinking:.*?\*\*', '', response, flags=re.DOTALL)
     response = re.sub(r'<thinking>.*?</thinking>', '', response, flags=re.DOTALL)
     
-    # 移除多余的空行
-    response = re.sub(r'\n{3,}', '\n\n', response)
+    # 移除常见的思考引导词
+    response = re.sub(r'(^|\n)让我思考一下[.：:][^\n]*\n', '\n', response)
+    response = re.sub(r'(^|\n)Let me think[.：:][^\n]*\n', '\n', response)
     
-    return response.strip()
+    # 移除XML和Markdown中常见的特殊标记
+    response = re.sub(r'</?[a-zA-Z][^>]*>', '', response)  # XML标签
+    
+    # 处理可能的引用格式保持一致
+    response = re.sub(r'```[a-zA-Z]*\n', '', response)  # 代码块开始标记
+    response = re.sub(r'```\n?', '', response)  # 代码块结束标记
+    
+    # 处理换行，保证段落之间有适当的空白
+    response = re.sub(r'\n{3,}', '\n\n', response)  # 多个换行替换为两个
+    
+    # 确保文本有适当的首尾格式
+    response = response.strip()
+    
+    return response
 
 def rerank_documents(query: str, docs: List[Document]) -> List[Document]:
     """
@@ -226,35 +243,105 @@ def perform_query(input_query: str, kb_id: Optional[int] = None) -> Optional[Dic
         kb_id: 知识库ID (可选)
         
     返回:
-        Dict[str, Any]: 包含回答和源信息的响应对象，失败时返回None
+        Dict[str, Any]: 包含回答和源信息的响应对象，失败时返回带有错误信息的字典
     """
     if not input_query:
-        return None
+        return {"error": "查询内容不能为空", "detail": "请提供一个有效的查询"}
     
     try:
+        # 从环境变量获取模型名称，并尝试匹配已安装的模型
+        import subprocess
+        model_name = os.getenv('LLM_MODEL', 'deepseek-r1:14b')
+        embedding_model_name = os.getenv('TEXT_EMBEDDING_MODEL', 'nomic-embed-text')
+        
+        print(f"使用语言模型: {model_name}")
+        print(f"使用嵌入模型: {embedding_model_name}")
+        
+        # 验证知识库ID (如果提供)
+        if kb_id is not None:
+            from db_utils import check_knowledge_base_exists
+            if not check_knowledge_base_exists(DB_PATH, kb_id):
+                return {
+                    "error": "知识库不存在",
+                    "detail": f"ID为{kb_id}的知识库不存在"
+                }
+        
         # 初始化语言模型
-        llm = ChatOllama(model=LLM_MODEL)
+        try:
+            llm = ChatOllama(model=model_name)
+        except Exception as model_error:
+            print(f"初始化语言模型时出错: {str(model_error)}")
+            # 尝试使用已安装的任意可用模型
+            try:
+                process = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
+                models = process.stdout.strip().split('\n')[1:]  # 跳过标题行
+                if models:
+                    # 提取第一个可用模型的名称
+                    available_model = models[0].split()[0]
+                    print(f"尝试使用可用模型: {available_model}")
+                    llm = ChatOllama(model=available_model)
+                else:
+                    return {
+                        "error": "无法初始化语言模型",
+                        "detail": f"指定的模型 {model_name} 不可用，且没有其他可用模型"
+                    }
+            except Exception as fallback_error:
+                return {
+                    "error": "无法初始化语言模型",
+                    "detail": f"原始错误: {str(model_error)}, 回退错误: {str(fallback_error)}"
+                }
         
         # 获取向量数据库实例
-        db = get_vector_db(kb_id)
+        try:
+            db = get_vector_db(kb_id)
+            # 检查向量数据库是否为空
+            if hasattr(db, '_collection') and db._collection.count() == 0:
+                return {
+                    "error": "知识库为空",
+                    "detail": f"知识库 {kb_id if kb_id else '默认'} 中没有文档，请先上传文档"
+                }
+        except Exception as db_error:
+            print(f"获取向量数据库时出错: {str(db_error)}")
+            return {
+                "error": "无法访问向量数据库",
+                "detail": str(db_error)
+            }
         
         # 获取提示模板
         query_prompt, answer_prompt = get_prompt()
 
-        # 设置多重查询检索器 - 增加检索数量以便后续重排
-        retriever = MultiQueryRetriever.from_llm(
-            retriever=db.as_retriever(search_kwargs={"k": 8}),  # 增加检索数量
-            llm=llm,
-            prompt=query_prompt
-        )
+        # 设置多重查询检索器
+        try:
+            retriever = MultiQueryRetriever.from_llm(
+                retriever=db.as_retriever(search_kwargs={"k": 8}),
+                llm=llm,
+                prompt=query_prompt
+            )
+        except Exception as retriever_error:
+            print(f"创建检索器时出错: {str(retriever_error)}")
+            return {
+                "error": "无法创建文档检索器",
+                "detail": str(retriever_error)
+            }
         
         # 执行检索以获取相关文档
-        retrieved_docs = retriever.get_relevant_documents(input_query)
+        try:
+            retrieved_docs = retriever.get_relevant_documents(input_query)
+        except Exception as retrieve_error:
+            print(f"检索文档时出错: {str(retrieve_error)}")
+            return {
+                "error": "文档检索失败",
+                "detail": str(retrieve_error)
+            }
         
         if not retrieved_docs:
             return {
                 "answer": "抱歉，没有找到相关的信息来回答您的问题。",
-                "sources": []
+                "sources": [],
+                "query": {
+                    "original": input_query,
+                    "kb_id": kb_id
+                }
             }
         
         # 重新排序文档以提高相关性
@@ -267,8 +354,15 @@ def perform_query(input_query: str, kb_id: Optional[int] = None) -> Optional[Dic
         context = "\n\n".join([doc.page_content for doc in top_docs])
         
         # 生成回答
-        formatted_prompt = answer_prompt.format(context=context, question=input_query)
-        raw_answer = llm.invoke(formatted_prompt).content
+        try:
+            formatted_prompt = answer_prompt.format(context=context, question=input_query)
+            raw_answer = llm.invoke(formatted_prompt).content
+        except Exception as llm_error:
+            print(f"生成回答时出错: {str(llm_error)}")
+            return {
+                "error": "无法生成回答",
+                "detail": str(llm_error)
+            }
         
         # 清理响应
         clean_answer = clean_llm_response(raw_answer)
@@ -277,12 +371,13 @@ def perform_query(input_query: str, kb_id: Optional[int] = None) -> Optional[Dic
         try:
             # 尝试获取嵌入向量以计算相关度
             from langchain_community.embeddings import OllamaEmbeddings
-            embedding_model = OllamaEmbeddings(model="nomic-embed-text")
+            embedding_model = OllamaEmbeddings(model=embedding_model_name)
             query_embedding = embedding_model.embed_query(input_query)
             doc_embeddings = [embedding_model.embed_query(doc.page_content) for doc in top_docs]
             sources = format_sources(top_docs, query_embedding, doc_embeddings)
-        except Exception as e:
-            print(f"计算相关度分数时出错: {str(e)}")
+        except Exception as embed_error:
+            print(f"计算相关度分数时出错: {str(embed_error)}")
+            # 继续而不计算相关度分数
             sources = format_sources(top_docs)
         
         # 组装最终响应
@@ -300,4 +395,7 @@ def perform_query(input_query: str, kb_id: Optional[int] = None) -> Optional[Dic
         print(f"执行查询时发生错误: {str(e)}")
         import traceback
         traceback.print_exc()
-        return None
+        return {
+            "error": "查询执行失败",
+            "detail": str(e)
+        }
