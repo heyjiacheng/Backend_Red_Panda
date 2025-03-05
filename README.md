@@ -1,105 +1,172 @@
 # Backend_Red_Panda
 
-## 环境安装
+## Environment Setup
 
-从[官网](https://ollama.com/)安装Ollama。
-再下载所需模型（可在.env中替换）：
+Install Ollama from the [official website](https://ollama.com/).
+Then download the required models (can be replaced in .env):
+
 ```bash
-# 下载语言模型
+# Download language model
 ollama run deepseek-r1:1.5b
-# 下载文本嵌入模型
+# Download text embedding model
 ollama pull nomic-embed-text
 ```
-克隆项目：
+
+Clone the project:
+
 ```bash
 git clone https://github.com/heyjiacheng/Backend_Red_Panda.git
 cd Backend_Red_Panda
 ```
-安装依赖包：
+
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
-开启后台
+
+Start the backend server:
+
 ```bash
 python3 app.py
 ```
 
-## API 接口文档
+## API Documentation
 
-### 知识库管理
+### Knowledge Base Management
 
-#### 创建知识库
+#### Create Knowledge Base
 
 ```bash
 curl -X POST http://localhost:8080/knowledge-bases -H "Content-Type: application/json" -d '{"name": "research_paper", "description": "my_papers"}'
 ```
 
-#### 列出所有知识库
+#### List All Knowledge Bases
 
 ```bash
 curl -X GET http://localhost:8080/knowledge-bases
 ```
 
-#### 获取单个知识库详情
+#### Get Knowledge Base Details
 
 ```bash
 curl -X GET http://localhost:8080/knowledge-bases/1
 ```
 
-#### 更新知识库
+#### Update Knowledge Base
 
 ```bash
 curl -X PUT http://localhost:8080/knowledge-bases/1 -H "Content-Type: application/json" -d '{"name": "updated_name", "description": "updated_description"}'
 ```
 
-#### 删除知识库
+#### Delete Knowledge Base
 
 ```bash
 curl -X DELETE http://localhost:8080/knowledge-bases/1
 ```
 
-### 文档处理
+### Document Processing
 
-#### 上传文档
+#### Upload Document
 
 ```bash
-# 上传到指定知识库（2 号知识库）
+# Upload to a specific knowledge base (knowledge base #2)
 curl -X POST http://localhost:8080/upload/2 -F file=@/Users/jiadengxu/Documents/3d_gaussian_splatting_low.pdf
 ```
 
-#### 列出所有文档
+#### List All Documents
 
 ```bash
-# 列出所有文档
+# List all documents
 curl -X GET http://localhost:8080/documents
+
+# List documents from a specific knowledge base (e.g., knowledge base #2)
+curl -X GET "http://localhost:8080/documents?knowledge_base_id=2"
 ```
 
-#### 获取文档详情（单个文档）
+#### Get Document Details
+
 ```bash
 curl -X GET http://localhost:8080/documents/1
 ```
 
-#### 下载文档
+#### Download Document
 
 ```bash
 curl -X GET http://localhost:8080/documents/1/download --output downloaded_document.pdf
 ```
 
-#### 删除文档
+#### Delete Document
 
 ```bash
 curl -X DELETE http://localhost:8080/documents/1
 ```
 
-### 查询功能
+### Conversation History Management
 
-#### 提问
+#### Create New Conversation
 
 ```bash
-# 在所有知识库中查询
+# Create a new conversation (not associated with any knowledge base)
+curl -X POST http://localhost:8080/conversations -H "Content-Type: application/json" -d '{"title": "My First Conversation"}'
+
+# Create a new conversation (associated with a specific knowledge base)
+curl -X POST http://localhost:8080/conversations -H "Content-Type: application/json" -d '{"title": "Discussion about Research Paper", "knowledge_base_id": 2}'
+```
+
+#### Get Conversation List
+
+```bash
+# Get all conversations
+curl -X GET http://localhost:8080/conversations
+
+# Get conversations for a specific knowledge base (e.g., knowledge base #2)
+curl -X GET "http://localhost:8080/conversations?knowledge_base_id=2"
+
+# Paginate conversation list
+curl -X GET "http://localhost:8080/conversations?limit=10&offset=0"
+```
+
+#### Get Conversation Details
+
+```bash
+curl -X GET http://localhost:8080/conversations/1
+```
+
+#### Delete Conversation
+
+```bash
+curl -X DELETE http://localhost:8080/conversations/1
+```
+
+#### Manually Add Message to Conversation
+
+```bash
+# Add user message
+curl -X POST http://localhost:8080/conversations/1/messages -H "Content-Type: application/json" -d '{"message_type": "user", "content": "What are the main points of this paper?"}'
+
+# Add assistant message
+curl -X POST http://localhost:8080/conversations/1/messages -H "Content-Type: application/json" -d '{"message_type": "assistant", "content": "This paper mainly discusses..."}'
+```
+
+### Query Functionality
+
+#### Ask Questions
+
+```bash
+# Query across all knowledge bases (without saving conversation history)
 curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What technique used here for 3D scene reconstruction?"}'
 
-# 在特定知识库中查询
+# Query in a specific knowledge base (without saving conversation history)
 curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What 3D reconstruction techniques are used in this research?", "knowledge_base_id": 2}'
+
+# Query in a specific knowledge base (and save to conversation history)
+curl -X POST http://localhost:8080/query -H "Content-Type: application/json" -d '{"query": "What are the main innovations in this paper?", "knowledge_base_id": 2, "conversation_id": 1}'
 ```
+
+### Health Check
+
+```bash
+# System health check
+curl http://localhost:8080/health
 ```

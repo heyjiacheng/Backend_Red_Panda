@@ -30,15 +30,14 @@ def print_info(message):
 
 def log_curl_and_response(curl_cmd, response):
     """Log the curl command and API response to a text file"""
-    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+    with open(LOG_FILE, 'a') as f:
         f.write(f"\n\n{'=' * 80}\n")
         f.write(f"TIMESTAMP: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"CURL COMMAND:\n{curl_cmd}\n\n")
         f.write(f"RESPONSE STATUS: {response.status_code}\n")
         try:
-            # Try to format response as JSON with ensure_ascii=False to properly display Unicode characters
-            response_json = response.json()
-            f.write(f"RESPONSE BODY:\n{json.dumps(response_json, indent=2, ensure_ascii=False)}\n")
+            # Try to format response as JSON
+            f.write(f"RESPONSE BODY:\n{json.dumps(response.json(), indent=2)}\n")
         except:
             # If not JSON, write as text
             f.write(f"RESPONSE BODY:\n{response.text}\n")
@@ -315,7 +314,7 @@ def main():
     
     # Initialize log file
     cleanup_log_file()
-    with open(LOG_FILE, 'w', encoding='utf-8') as f:
+    with open(LOG_FILE, 'w') as f:
         f.write(f"RED PANDA BACKEND API TEST LOG\n")
         f.write(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write(f"{'=' * 80}\n")
