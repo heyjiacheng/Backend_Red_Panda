@@ -270,15 +270,26 @@ def route_embed():
     except ValueError:
         return jsonify({"error": "invalid knowledge base id"}), 400
     
-    success, doc_id = embed_document(file, kb_id)
+    success, doc_id, message = embed_document(file, kb_id)
 
     if success:
+        # Check if the file was saved but content extraction failed
+        if "content extraction failed" in message:
+            return jsonify({
+                "warning": "File saved but content cannot be searched",
+                "message": "The file was saved to the knowledge base but could not be processed for search. It may be corrupted or password-protected.",
+                "document_id": doc_id,
+                "technical_details": message
+            }), 201  # 201 Created - since we did create a record, just with limitations
+        else:
+            return jsonify({
+                "message": "success with embedding",
+                "document_id": doc_id
+            }), 200
+    else:
         return jsonify({
-            "message": "success with embedding",
-            "document_id": doc_id
-        }), 200
-
-    return jsonify({"error": "failed to embed document"}), 400
+            "error": message
+        }), 400
 
 @app.route('/query', methods=['POST'])
 def route_query():
@@ -391,30 +402,26 @@ def upload_document_simple(kb_id):
         }), 404
     
     print(f"正在处理文件上传: {file.filename} 到知识库 {kb_id}")
-    success, doc_id = embed_document(file, kb_id)
+    success, doc_id, message = embed_document(file, kb_id)
 
     if success:
+        # Check if the file was saved but content extraction failed
+        if "content extraction failed" in message:
+            return jsonify({
+                "warning": "File saved but content cannot be searched",
+                "message": "The file was saved to the knowledge base but could not be processed for search. It may be corrupted or password-protected.",
+                "document_id": doc_id,
+                "technical_details": message
+            }), 201  # 201 Created - since we did create a record, just with limitations
+        else:
+            return jsonify({
+                "message": "success with embedding",
+                "document_id": doc_id
+            }), 200
+    else:
         return jsonify({
-            "message": "success with embedding",
-            "document_id": doc_id,
-            "knowledge_base_id": kb_id
-        }), 200
-
-    # 如果失败，尝试给出更具体的错误信息
-    if not file.filename or '.' not in file.filename:
-        return jsonify({"error": "invalid filename", "detail": "Filename is missing or invalid"}), 400
-    
-    file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-    if file_extension != 'pdf':
-        return jsonify({
-            "error": "unsupported file type", 
-            "detail": f"Only PDF files are supported. Received file type: {file_extension}"
+            "error": message
         }), 400
-        
-    return jsonify({
-        "error": "failed to embed document",
-        "detail": "An error occurred while processing the document. Please check server logs for details."
-    }), 500
 
 # ================ 对话历史API ================
 

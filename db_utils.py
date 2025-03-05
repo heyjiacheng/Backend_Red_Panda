@@ -21,7 +21,7 @@ def init_database(db_path):
     )
     ''')
     
-    # 检查文档表中是否存在knowledge_base_id列
+    # 检查文档表中是否存在knowledge_base_id列和extraction_failed列
     cursor.execute("PRAGMA table_info(documents)")
     columns = [info[1] for info in cursor.fetchall()]
     
@@ -43,14 +43,21 @@ def init_database(db_path):
             file_size INTEGER,
             metadata TEXT,
             knowledge_base_id INTEGER,
+            extraction_failed BOOLEAN DEFAULT 0,
             FOREIGN KEY (knowledge_base_id) REFERENCES knowledge_bases(id)
         )
         ''')
-    elif 'knowledge_base_id' not in columns:
-        # 添加knowledge_base_id列
-        cursor.execute("ALTER TABLE documents ADD COLUMN knowledge_base_id INTEGER")
-        # 为现有文档设置默认知识库ID
-        cursor.execute("UPDATE documents SET knowledge_base_id = 1 WHERE knowledge_base_id IS NULL")
+    else:
+        # 添加可能缺少的列
+        if 'knowledge_base_id' not in columns:
+            # 添加knowledge_base_id列
+            cursor.execute("ALTER TABLE documents ADD COLUMN knowledge_base_id INTEGER")
+            # 为现有文档设置默认知识库ID
+            cursor.execute("UPDATE documents SET knowledge_base_id = 1 WHERE knowledge_base_id IS NULL")
+        
+        if 'extraction_failed' not in columns:
+            # 添加extraction_failed列
+            cursor.execute("ALTER TABLE documents ADD COLUMN extraction_failed BOOLEAN DEFAULT 0")
     
     # 如果没有知识库，添加默认知识库
     cursor.execute("SELECT COUNT(*) FROM knowledge_bases")
@@ -61,13 +68,13 @@ def init_database(db_path):
     conn.commit()
     conn.close()
 
-def save_document_metadata(db_path, original_filename, stored_filename, file_path, file_size, kb_id=1):
+def save_document_metadata(db_path, original_filename, stored_filename, file_path, file_size, kb_id=1, extraction_failed=False):
     """保存文档元数据到数据库"""
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO documents (original_filename, stored_filename, file_path, file_size, knowledge_base_id) VALUES (?, ?, ?, ?, ?)",
-        (original_filename, stored_filename, file_path, file_size, kb_id)
+        "INSERT INTO documents (original_filename, stored_filename, file_path, file_size, knowledge_base_id, extraction_failed) VALUES (?, ?, ?, ?, ?, ?)",
+        (original_filename, stored_filename, file_path, file_size, kb_id, 1 if extraction_failed else 0)
     )
     doc_id = cursor.lastrowid
     conn.commit()
