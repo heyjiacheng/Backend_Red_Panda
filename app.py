@@ -3,7 +3,7 @@ import sqlite3
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import the CORS extension
 from embed import embed_document
-from query import perform_query
+from query import perform_query, chat_with_ollama
 from db_utils import init_database, get_db_connection, create_conversation, get_conversation, get_conversations, delete_conversation, save_conversation_message
 import json
 
@@ -376,6 +376,61 @@ def route_query():
         traceback.print_exc()
         return jsonify({"error": f"error with query", "detail": str(e)}), 500
 
+@app.route('/chat', methods=['POST'])
+def route_chat():
+    """直接与Ollama模型对话，不使用知识库"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "please provide a request body"}), 400
+            
+        user_query = data.get('query')
+        conversation_id = data.get('conversation_id')
+        
+        if not user_query:
+            return jsonify({"error": "please provide a query"}), 400
+        
+        # 验证对话ID (如果提供)
+        if conversation_id is not None:
+            try:
+                conversation_id = int(conversation_id)
+                conversation = get_conversation(DB_PATH, conversation_id)
+                if not conversation:
+                    return jsonify({"error": "conversation not found", "detail": f"Conversation ID {conversation_id} does not exist"}), 404
+            except ValueError:
+                return jsonify({"error": "invalid conversation id"}), 400
+        
+        # 直接调用Ollama模型
+        response = chat_with_ollama(user_query)
+        
+        # 检查是否对话失败
+        if response and "error" in response:
+            return jsonify(response), 400
+            
+        # 处理对话历史
+        if conversation_id:
+            try:
+                # 保存用户问题到对话历史
+                save_conversation_message(DB_PATH, conversation_id, 'user', user_query)
+                
+                # 保存AI回答到对话历史
+                save_conversation_message(DB_PATH, conversation_id, 'assistant', response.get('answer', ''))
+                
+                # 添加会话ID到响应
+                response['conversation_id'] = conversation_id
+                
+            except Exception as e:
+                print(f"保存对话历史出错: {str(e)}")
+                response['warning'] = "Failed to save conversation history"
+        
+        return jsonify(response), 200
+    except Exception as e:
+        print(f"直接对话处理错误: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "error with chat", "detail": str(e)}), 500
+
 # 添加一个新的路由，简化文档上传
 @app.route('/upload/<int:kb_id>', methods=['POST'])
 def upload_document_simple(kb_id):
@@ -431,6 +486,7 @@ def list_conversations():
     kb_id = request.args.get('knowledge_base_id')
     limit = request.args.get('limit', 20, type=int)
     offset = request.args.get('offset', 0, type=int)
+    include_message_count = request.args.get('include_message_count', 'false').lower() == 'true'
     
     try:
         if kb_id:
@@ -438,7 +494,7 @@ def list_conversations():
     except ValueError:
         return jsonify({"error": "invalid knowledge base id"}), 400
     
-    conversations = get_conversations(DB_PATH, kb_id, limit, offset)
+    conversations = get_conversations(DB_PATH, kb_id, limit, offset, include_message_count)
     return jsonify({"conversations": conversations})
 
 @app.route('/conversations', methods=['POST'])
