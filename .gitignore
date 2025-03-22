@@ -6,10 +6,6 @@
 /chroma/
 /chroma/**
 
-# 忽略 data 目录下的内容
-/data/
-/data/**
-
 # 临时文件夹
 /_temp/
 
@@ -48,3 +44,6 @@ ENV/
 .vscode/
 *.swp
 *.swo
+
+# Editor directories and files
+.DS_Store
