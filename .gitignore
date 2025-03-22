@@ -1,0 +1,50 @@
+# 忽略 documents 目录（存储上传的文档）
+/documents/
+/documents/**
+
+# 忽略 chroma 向量数据库目录
+/chroma/
+/chroma/**
+
+# 忽略 data 目录下的内容
+/data/
+/data/**
+
+# 临时文件夹
+/_temp/
+
+# 数据库文件
+*.db
+
+# Python相关
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+.env
+
+# 编辑器相关
+.idea/
+.vscode/
+*.swp
+*.swo
