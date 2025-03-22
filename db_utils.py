@@ -188,7 +188,7 @@ def get_conversation(db_path, conversation_id):
     conn.close()
     return conversation_dict
 
-def get_conversations(db_path, kb_id=None, limit=20, offset=0):
+def get_conversations(db_path, kb_id=None, limit=20, offset=0, include_message_count=False):
     """
     获取对话列表，可按知识库筛选
     
@@ -197,6 +197,7 @@ def get_conversations(db_path, kb_id=None, limit=20, offset=0):
         kb_id: 知识库ID (可选)
         limit: 返回的最大记录数
         offset: 分页起始位置
+        include_message_count: 是否包含消息数量统计
         
     返回:
         list: 对话列表
@@ -218,7 +219,7 @@ def get_conversations(db_path, kb_id=None, limit=20, offset=0):
     cursor.execute(query, params)
     conversations = [dict(row) for row in cursor.fetchall()]
     
-    # 获取每个对话的最后一条消息
+    # 获取每个对话的最后一条消息和消息数量
     for conv in conversations:
         cursor.execute(
             "SELECT * FROM conversation_messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 1",
@@ -227,6 +228,15 @@ def get_conversations(db_path, kb_id=None, limit=20, offset=0):
         last_message = cursor.fetchone()
         if last_message:
             conv['last_message'] = dict(last_message)
+            
+        # 如果需要，获取消息数量
+        if include_message_count:
+            cursor.execute(
+                "SELECT COUNT(*) as message_count FROM conversation_messages WHERE conversation_id = ?",
+                (conv['id'],)
+            )
+            result = cursor.fetchone()
+            conv['message_count'] = result['message_count'] if result else 0
     
     conn.close()
     return conversations

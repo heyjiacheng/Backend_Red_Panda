@@ -156,10 +156,10 @@ def format_sources(retrieved_docs: List[Document], query_embedding=None, doc_emb
 
 def clean_llm_response(response: str) -> str:
     """
-    清理LLM响应中的内部思考和特殊标记
+    清理LLM的响应，移除特殊标记和不需要的部分
     
     参数:
-        response: LLM原始响应
+        response: 原始响应文本
         
     返回:
         str: 清理后的响应
@@ -167,40 +167,128 @@ def clean_llm_response(response: str) -> str:
     if not response:
         return "抱歉，无法生成回答。"
     
-    # 移除<think>...</think>块
+    # 移除思考过程标记 (如<think>...</think>)
     import re
-    response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+    cleaned = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
     
     # 移除其他可能的思考标记
-    response = re.sub(r'\*\*思考：.*?\*\*', '', response, flags=re.DOTALL)
-    response = re.sub(r'\*\*thinking:.*?\*\*', '', response, flags=re.DOTALL)
-    response = re.sub(r'<thinking>.*?</thinking>', '', response, flags=re.DOTALL)
+    cleaned = re.sub(r'\*\*思考：.*?\*\*', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(r'\*\*thinking:.*?\*\*', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(r'<thinking>.*?</thinking>', '', cleaned, flags=re.DOTALL)
     
     # 移除常见的思考引导词
-    response = re.sub(r'(^|\n)让我思考一下[.：:][^\n]*\n', '\n', response)
-    response = re.sub(r'(^|\n)Let me think[.：:][^\n]*\n', '\n', response)
+    cleaned = re.sub(r'(^|\n)让我思考一下[.：:][^\n]*\n', '\n', cleaned)
+    cleaned = re.sub(r'(^|\n)Let me think[.：:][^\n]*\n', '\n', cleaned)
     
     # 移除XML和Markdown中常见的特殊标记
-    response = re.sub(r'</?[a-zA-Z][^>]*>', '', response)  # XML标签
+    cleaned = re.sub(r'</?[a-zA-Z][^>]*>', '', cleaned)  # XML标签
     
     # 处理可能的引用格式保持一致
-    response = re.sub(r'```[a-zA-Z]*\n', '', response)  # 代码块开始标记
-    response = re.sub(r'```\n?', '', response)  # 代码块结束标记
+    cleaned = re.sub(r'```[a-zA-Z]*\n', '', cleaned)  # 代码块开始标记
+    cleaned = re.sub(r'```\n?', '', cleaned)  # 代码块结束标记
     
     # 处理换行，保证段落之间有适当的空白
-    response = re.sub(r'\n{3,}', '\n\n', response)  # 多个换行替换为两个
+    cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)  # 多个换行替换为两个
+    
+    # 移除多余的空白行
+    cleaned = re.sub(r'\n\s*\n', '\n\n', cleaned)
     
     # 确保文本有适当的首尾格式
-    response = response.strip()
+    cleaned = cleaned.strip()
     
-    return response
+    return cleaned
+
+def chat_with_ollama(input_query: str) -> Dict[str, Any]:
+    """
+    直接与Ollama模型对话，不使用知识库
+    
+    参数:
+        input_query: 用户输入的问题
+        
+    返回:
+        Dict[str, Any]: 包含回答的响应对象
+    """
+    if not input_query:
+        return {"error": "查询内容不能为空", "detail": "请提供一个有效的查询"}
+    
+    try:
+        # 从环境变量获取模型名称
+        import subprocess
+        model_name = os.getenv('LLM_MODEL', 'deepseek-r1:14b')
+        
+        print(f"直接对话模式，使用语言模型: {model_name}")
+        
+        # 初始化语言模型
+        try:
+            llm = ChatOllama(model=model_name)
+        except Exception as model_error:
+            print(f"初始化语言模型时出错: {str(model_error)}")
+            # 尝试使用已安装的任意可用模型
+            try:
+                process = subprocess.run(['ollama', 'list'], capture_output=True, text=True)
+                models = process.stdout.strip().split('\n')[1:]  # 跳过标题行
+                if models:
+                    # 提取第一个可用模型的名称
+                    available_model = models[0].split()[0]
+                    print(f"尝试使用可用模型: {available_model}")
+                    llm = ChatOllama(model=available_model)
+                else:
+                    return {
+                        "error": "无法初始化语言模型",
+                        "detail": f"指定的模型 {model_name} 不可用，且没有其他可用模型"
+                    }
+            except Exception as fallback_error:
+                return {
+                    "error": "无法初始化语言模型",
+                    "detail": f"原始错误: {str(model_error)}, 回退错误: {str(fallback_error)}"
+                }
+        
+        # 设置对话提示模板
+        chat_prompt = ChatPromptTemplate.from_template("""请回答以下问题。提供清晰、专业的回答。
+        
+        问题: {question}
+        """)
+        
+        # 生成回答
+        try:
+            formatted_prompt = chat_prompt.format(question=input_query)
+            raw_answer = llm.invoke(formatted_prompt).content
+        except Exception as llm_error:
+            print(f"生成回答时出错: {str(llm_error)}")
+            return {
+                "error": "无法生成回答",
+                "detail": str(llm_error)
+            }
+        
+        # 清理响应
+        clean_answer = clean_llm_response(raw_answer)
+        
+        # 组装最终响应
+        response = {
+            "answer": clean_answer,
+            "sources": [],  # 直接对话模式没有外部源
+            "query": {
+                "original": input_query,
+                "direct_chat": True
+            }
+        }
+        
+        return response
+    except Exception as e:
+        print(f"直接对话时发生错误: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {
+            "error": "对话执行失败",
+            "detail": str(e)
+        }
 
 def rerank_documents(query: str, docs: List[Document]) -> List[Document]:
     """
-    对文档进行重新排序，找出与查询最相关的文档
+    使用简单的相关性评分重新排序文档
     
     参数:
-        query: 用户查询
+        query: 原始查询
         docs: 检索到的文档列表
         
     返回:
